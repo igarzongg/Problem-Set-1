@@ -50,23 +50,54 @@ summary_table_sex <- data.frame(
 )
 print(summary_table_sex, row.names = FALSE)
 
-freq_table_wap <- table(db$wap)
-prop_table_wap <- prop.table(table(db$wap))
-summary_table_wap <- data.frame(
-  Status = c("0 (N/Working age)", "1 (Working age)"),  
-  Count = as.numeric(freq_table_wap),     
-  Proportion = round(as.numeric(prop_table_wap), 4)  
+freq_table_coll <- table(db$college)
+prop_table_coll <- prop.table(table(db$college))
+summary_table_coll <- data.frame(
+  Academic_achievement = c("0 (Below Tertiary Education)", "1 (Tertiary Education or more)"),  
+  Count = as.numeric(freq_table_coll),     
+  Proportion = round(as.numeric(prop_table_coll), 4)  
 )
-print(summary_table_wap, row.names = FALSE)
+print(summary_table_coll, row.names = FALSE)
 
-freq_table_pea <- table(db$pea)
-prop_table_pea <- prop.table(table(db$pea))
-summary_table_pea <- data.frame(
-  Status = c("0 (N/Economically Active)", "1 (Economically Active)"), #Not employed contains all unemployed, economically inactive population, and population that is not working age.
-  Count = as.numeric(freq_table_pea),     
-  Proportion = round(as.numeric(prop_table_pea), 4)  
+freq_table_form <- table(db$formal)
+prop_table_form <- prop.table(table(db$formal))
+summary_table_form <- data.frame(
+  Employment_type = c("0 (Informal)", "1 (Formal / Social Security)"),
+  Proportion = round(as.numeric(prop_table_form), 4)  
 )
-print(summary_table_pea, row.names = FALSE)
+print(summary_table_form, row.names = FALSE)
+
+unique(db$relab)
+summary(db$relab)
+
+
+db$relab_factor <- factor(
+  db$relab, 
+  levels = 1:9, 
+  labels = c(
+    "1 (Private sector worker)", 
+    "2 (Government worker)", 
+    "3 (Domestic worker)", 
+    "4 (Self-employed)", 
+    "5 (Employer)", 
+    "6 (Unpaid family worker)", 
+    "7 (Unpaid worker in others' businesses)", 
+    "8 (Day laborer)", 
+    "9 (Other)"
+  )
+)
+
+freq_table_relab <- table(db$relab_factor)
+prop_table_relab <- prop.table(freq_table_relab)
+
+summary_table_relab <- data.frame(
+  Occupation = names(freq_table_relab),
+  Count = as.numeric(freq_table_relab),
+  Proportion = round(as.numeric(prop_table_relab), 4)
+)
+
+print(summary_table_relab, row.names = FALSE)
+
 
 freq_table_ocu <- table(db$ocu)
 prop_table_ocu <- prop.table(table(db$ocu))
@@ -100,5 +131,7 @@ ggplot(employment_summary, aes(x = "", y = Proportion, fill = Status)) +
   theme_void()  
 
 #CONTINUOUS VARIABLES
+
+
 
 #Aca nos toca poner el stargazer con la variable de ingreso por hora, edad, y oras variables continuas de interes.
