@@ -33,10 +33,23 @@ db <- as_tibble(db)
 
 skim(db) %>% head()
 
+summary(db$age)
+
+freq_table_ocu <- table(db$ocu)
+prop_table_ocu <- prop.table(table(db$ocu))
+summary_table_ocu <- data.frame(
+  Status = c("0 (N/Employed)", "1 (Employed)"), #Not employed contains all unemployed, economically inactive population, and population that is not working age.
+  Count = as.numeric(freq_table_ocu),     
+  Proportion = round(as.numeric(prop_table_ocu), 4)  
+)
+print(summary_table_ocu, row.names = FALSE)
+
 db <- db %>%
   filter(age > 18, ocu == 1)
 
 # DATA TRANSFORMATION  ---------------------------------------------------------
+
+
 
 #Aca toca ver que hacemos con los datos missing (ver cuaderno clase complementaria 1)
 
@@ -101,16 +114,6 @@ summary_table_relab <- data.frame(
 
 print(summary_table_relab, row.names = FALSE)
 
-
-freq_table_ocu <- table(db$ocu)
-prop_table_ocu <- prop.table(table(db$ocu))
-summary_table_ocu <- data.frame(
-  Status = c("0 (N/Employed)", "1 (Employed)"), #Not employed contains all unemployed, economically inactive population, and population that is not working age.
-  Count = as.numeric(freq_table_ocu),     
-  Proportion = round(as.numeric(prop_table_ocu), 4)  
-)
-print(summary_table_ocu, row.names = FALSE)
-
 #CONTINUOUS VARIABLES
 
 summary_table <- data.frame(
@@ -128,8 +131,77 @@ summary_table <- data.frame(
 )
 print(summary_table)
 
+#Hourly salary distribution by age grouped by employment type (Formal or Informal)
 
+plot1 <- ggplot(db, aes(x = age, y = y_ingLab_m_ha, color = as.factor(formal))) +
+  geom_point() +
+  scale_color_manual(
+    values = c("red", "blue"), 
+    labels = c("Informal", "Formal") 
+  ) +
+  labs(
+    color = "Employment Type",  
+    title = "Hourly Salary Distribution by Age",
+    subtitle = "Grouped by Employment Type (Formal or Informal)",
+    x = "Age (Years)",  
+    y = "Hourly Salary (COP)"  
+  ) +
+  theme_minimal()
 
+#Distribution of Hourly Salary by Job Type
 
+plot2 <- ggplot(db, aes(x = as.factor(relab), y = y_ingLab_m_ha)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(
+    title = "Distribution of Hourly Salary by Job Type",
+    x = "Job Type",
+    y = "Hourly Salary (COP)"
+  ) +
+  theme_minimal()
+
+#Density plot of Hourly Salary grouped by access to tertiary education
+
+plot3 <- ggplot(db, aes(x = y_ingLab_m_ha, fill = as.factor(college))) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Hourly Salary Distribution by College Education",
+    x = "Hourly Salary (COP)",
+    fill = "College (0 = No, 1 = Yes)"
+  ) +
+  theme_minimal()
+
+#Histogram of Hourly Salary grouped by sex
+
+plot4 <- ggplot(data = db) + 
+  geom_histogram(mapping = aes(x = y_ingLab_m, group = as.factor(sex), fill = as.factor(sex)), bins = 30) + 
+  scale_fill_manual(
+    values = c("0" = "purple", "1" = "green"), 
+    labels = c("0" = "Female", "1" = "Male"), 
+    name = "Sex"
+  ) +
+  labs(
+    title = "Histogram of Hourly Salary by Sex",
+    x = "Hourly Salary (COP)",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+#Employment Types for People with a College Degree OJO PONER MAS BONITO
+
+plot5 <- ggplot(data = db) + 
+  geom_bar(mapping = aes(x = relab, group = as.factor(college), fill = as.factor(college)), width = 0.7) + 
+  scale_fill_manual(
+    values = c("Yes" = "blue", "No" = "red"), 
+    labels = c("Yes" = "College Degree", "No" = "No College Degree"), 
+    name = "College Degree"
+  ) +
+  labs(
+    title = "Employment Types for People with a College Degree",
+    x = "Employment Type",
+    y = "Number of People"
+  ) +
+  theme_minimal() 
+
+plot5
 
 #Aca nos toca poner el stargazer con la variable de ingreso por hora, edad, y oras variables continuas de interes.
