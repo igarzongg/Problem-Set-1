@@ -17,7 +17,10 @@ p_load(rio,
        rvest,
        caret,
        boot,
-       MASS)
+       MASS,
+       lintr)
+
+lintr::lint_dir()
 
 # IMPORTING DATABASES ----------------------------------------------------------
 
@@ -108,29 +111,24 @@ summary_table_ocu <- data.frame(
 )
 print(summary_table_ocu, row.names = FALSE)
 
-#What fraction of the economically active population is employed?
-
-pea_data <- subset(db, pea == 1)
-
-freq_table <- table(pea_data$ocu)
-prop_table <- prop.table(freq_table)
-
-employment_summary <- data.frame(
-  Status = c("N/Employed", "Employed"),  # Labels for employment status
-  Count = as.numeric(freq_table),        # Number of observations
-  Proportion = as.numeric(prop_table)    # Convert proportions to numeric
-)
-employment_summary$Label <- paste0(round(employment_summary$Proportion * 100, 1), "%")
-
-ggplot(employment_summary, aes(x = "", y = Proportion, fill = Status)) +
-  geom_bar(stat = "identity", width = 1) +  # Create a bar to be transformed into a pie
-  coord_polar("y") +  # Convert bar chart into a pie chart
-  scale_fill_manual(values = c("blue", "red")) +  
-  geom_text(aes(label = Label), position = position_stack(vjust = 0.5), color = "white", size = 5) +  # Add percentage labels
-  labs(title = "Employment Status of EAP, GEIH (2018)") +
-  theme_void()  
-
 #CONTINUOUS VARIABLES
+
+summary_table <- data.frame(
+  Statistic = c("N", "Mean", "St. Dev.", "Min", "Max"),
+  y_ingLab_m_ha = c(sum(!is.na(db$y_ingLab_m_ha)),
+                    mean(db$y_ingLab_m_ha, na.rm = TRUE),
+                    sd(db$y_ingLab_m_ha, na.rm = TRUE),
+                    min(db$y_ingLab_m_ha, na.rm = TRUE),
+                    max(db$y_ingLab_m_ha, na.rm = TRUE)),
+  age = c(sum(!is.na(db$age)),
+          mean(db$age, na.rm = TRUE),
+          sd(db$age, na.rm = TRUE),
+          min(db$age, na.rm = TRUE),
+          max(db$age, na.rm = TRUE))
+)
+print(summary_table)
+
+
 
 
 
