@@ -49,9 +49,9 @@ db <- db %>%
 
 # DATA TRANSFORMATION  ---------------------------------------------------------
 
+#MISSING VALUES
 
-
-#Aca toca ver que hacemos con los datos missing (ver cuaderno clase complementaria 1)
+db_miss <- skim(db) %>% dplyr::select( skim_variable, n_missing)
 
 # DESCRIPTIVE VARIABLES --------------------------------------------------------
 
@@ -201,7 +201,3 @@ plot5 <- ggplot(data = db) +
     y = "Number of People"
   ) +
   theme_minimal() 
-
-plot5
-
-#Aca nos toca poner el stargazer con la variable de ingreso por hora, edad, y oras variables continuas de interes.
