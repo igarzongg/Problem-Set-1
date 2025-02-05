@@ -62,6 +62,12 @@ db_miss<- db_miss %>% filter(n_missing!= 0)
 head(db_miss, 10)
 tail(db_miss, 10)
 
+##incompleto
+
+#OUTLIERS
+
+##incompleto
+
 # DESCRIPTIVE VARIABLES --------------------------------------------------------
 
 # CATEGORICAL VARIABLES
