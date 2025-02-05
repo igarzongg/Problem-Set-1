@@ -52,6 +52,15 @@ db <- db %>%
 #MISSING VALUES
 
 db_miss <- skim(db) %>% dplyr::select( skim_variable, n_missing)
+Nobs <- nrow(db) 
+Nobs
+db_miss<- db_miss %>% mutate(p_missing= n_missing/Nobs)
+head(db_miss)
+db_miss <- db_miss %>% arrange(-n_missing) ## or arrange(desc(n_missing))
+### Keep only variables with missing 
+db_miss<- db_miss %>% filter(n_missing!= 0)
+head(db_miss, 10)
+tail(db_miss, 10)
 
 # DESCRIPTIVE VARIABLES --------------------------------------------------------
 
@@ -79,13 +88,23 @@ freq_table_form <- table(db$formal)
 prop_table_form <- prop.table(table(db$formal))
 summary_table_form <- data.frame(
   Employment_type = c("0 (Informal)", "1 (Formal / Social Security)"),
+  Count = as.numeric(freq_table_form),
   Proportion = round(as.numeric(prop_table_form), 4)  
 )
 print(summary_table_form, row.names = FALSE)
 
+freq_table_sfirm <- table(db$sizeFirm)
+prop_table_sfirm <- prop.table(table(db$sizeFirm))
+summary_table_sfirm <- data.frame(
+  Firm_size = c("self-employed ", "2-5 workers ", "6-10 workers ", "11-50 workers", 
+                ">50 workers"),
+  Count = as.numeric(freq_table_sfirm),
+  Proportion = round(as.numeric(prop_table_sfirm), 4)  
+)
+print(summary_table_sfirm, row.names = FALSE)
+
 unique(db$relab)
 summary(db$relab)
-
 
 db$relab_factor <- factor(
   db$relab, 
@@ -127,9 +146,16 @@ summary_table <- data.frame(
           mean(db$age, na.rm = TRUE),
           sd(db$age, na.rm = TRUE),
           min(db$age, na.rm = TRUE),
+          max(db$age, na.rm = TRUE)),
+  totalHoursWorked = c(sum(!is.na(db$age)),
+          mean(db$age, na.rm = TRUE),
+          sd(db$age, na.rm = TRUE),
+          min(db$age, na.rm = TRUE),
           max(db$age, na.rm = TRUE))
 )
 print(summary_table)
+
+#TABLES
 
 #Hourly salary distribution by age grouped by employment type (Formal or Informal)
 
