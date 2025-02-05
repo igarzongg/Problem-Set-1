@@ -1,1 +1,6 @@
-sin querer borre el que estaba antes, perdon
+Problem set 1  / /
+
+Juan Pablo Grimaldos - 
+Isabella Garzón -
+Sara Rojas - 
+Lina Alvarez 
