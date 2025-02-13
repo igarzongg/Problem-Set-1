@@ -3,6 +3,7 @@
 
 # Poner resto de nombres y codigos
 #Juan Pablo Grimaldos Olivella - 202122627
+#Isabella Garzón González - 202122524
 
 library("pacman")
 p_load(rio,
