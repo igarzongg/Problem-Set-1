@@ -1,7 +1,6 @@
 
 # PROBLEM SET 1
 
-# Poner resto de nombres y codigos
 #Juan Pablo Grimaldos Olivella - 202122627
 #Isabella Garzón González - 202122524
 
@@ -52,14 +51,49 @@ prop_table_ocu <- prop.table(table(db$ocu))
 summary_table_ocu <- data.frame(
   Status = c("0 (N/Employed)", "1 (Employed)"), #Not employed contains all 
   #unemployed, economically inactive population, and population 
-  #that is not working age.
+  #that is not working age. This is why we will use ocu as our emp. variable.
   Count = as.numeric(freq_table_ocu),     
   Proportion = round(as.numeric(prop_table_ocu), 4)  
 )
 print(summary_table_ocu, row.names = FALSE)
 
+#Our analysis will only consider individuals with 18 or more years of age.
+
 db <- db %>%
   filter(age > 18, ocu == 1)
+
+#We will transform the sex variable to make its affirmative (1) value female.
+#This means that the variable will display 1 if the ob's sex is female.
+
+db <- db %>% 
+  mutate(female = ifelse(sex==0,1,0))
+
+#Before transforming our income variable(s), we have to take a look at its dist.
+
+#Nominal hourly salaries
+
+summary(db$y_ingLab_m_ha)
+
+plot0 <- ggplot(db, aes(x = y_ingLab_m_ha )) +
+  geom_histogram(bins = 50, fill = "darkblue") +
+  labs(x = "Total Hourly Nominal Income", y = "N. Obs") +
+  theme_bw() 
+
+plot0
+
+#Real hourly salaries
+
+summary(db$y_salary_m_hu)
+
+plot00 <- ggplot(db, aes(x = y_salary_m_hu )) +
+  geom_histogram(bins = 50, fill = "darkblue") +
+  labs(x = "Total Hourly Real Income", y = "N. Obs") +
+  theme_bw() 
+
+plot00
+
+#There is no observations with 0 hourly income. Nonetheless, the dist. of this
+#variable has a very long right tail. We will use the log of income instead.
 
 db <- db %>% 
   mutate(y_ingLab_m_ha = ifelse(y_ingLab_m_ha>0, log(y_ingLab_m_ha), 0))
@@ -112,8 +146,8 @@ ggplot(tail(db_miss, 40), aes(x = reorder(skim_variable, +p_missing) ,
 
 ## Selecting interest variables some variables
 
-db_1 <- db %>% dplyr::select(directorio, secuencia_p, orden, sex, age, ocu, 
-                       relab, totalHoursWorked,
+db_1 <- db %>% dplyr::select(directorio, secuencia_p, orden, female, age, ocu, 
+                       relab, p6050, totalHoursWorked,
                     formal, sizeFirm, maxEducLevel, y_ingLab_m_ha,
                     y_salary_m_hu)
 
@@ -135,6 +169,14 @@ db_missing <-  db_missing %>%  dplyr::select(which(apply(db_missing, 2,
 M <- cor(db_missing)
 corrplot(M) ##Looks like most of our missing values are in the wage variables.
 
+db_missing_salary <- db_1 %>%  filter(formal == 1)
+vis_miss(db_missing_salary) 
+
+db_missing_salary <- db_1 %>%  filter(formal == 0)
+vis_miss(db_missing_salary) #Aha! Most missing values in salary come from 
+#informal workers. This makes sense because informal workers don't usually know 
+#their hourly wage, since they usually don't have a fixed income.
+
 ## Mean / Median visualization of nominal salary
 
 ggplot(db, aes(y_ingLab_m_ha)) +
@@ -149,15 +191,24 @@ ggplot(db, aes(y_ingLab_m_ha)) +
   theme_classic() +
   theme(plot.title = element_text(size = 18))
 
-##Graph shows evidence of a distribution of total income with a long right tail. 
+##Graph shows evidence of a distribution of total income with a right tail. 
 #This indicates that missing value imputation is more adequate via the median.
 
-##Imputing missing values using the median
+##Imputing missing values using the median salary of informal workers.
 
-db <- db  %>%
-  mutate(y_ingLab_m_ha = ifelse(is.na(y_ingLab_m_ha) == TRUE,
-                                median(db$y_ingLab_m_ha, na.rm = TRUE) , 
-                                y_ingLab_m_ha))
+median_y_formal0 <- median(db$y_ingLab_m_ha[db$formal == 0], na.rm = TRUE)
+
+db$y_ingLab_m_ha <- ifelse(is.na(db$y_ingLab_m_ha) & db$formal == 0, 
+                           median_y_formal0, 
+                           db$y_ingLab_m_ha)
+
+## We will do the same for formal workers.
+
+median_y_formal1 <- median(db$y_ingLab_m_ha[db$formal == 1], na.rm = TRUE)
+
+db$y_ingLab_m_ha <- ifelse(is.na(db$y_ingLab_m_ha) & db$formal == 1, 
+                           median_y_formal1, 
+                           db$y_ingLab_m_ha)
 
 ## Mean / Median visualization of real salary
 
@@ -177,44 +228,88 @@ ggplot(db, aes(y_salary_m_hu)) +
 
 ## Now, we check for how the data looks after the transformation.
 
-db <- db  %>%
-  mutate(y_salary_m_hu = ifelse(is.na(y_salary_m_hu) == TRUE,
-                                median(db$y_salary_m_hu, na.rm = TRUE) , 
-                                y_salary_m_hu))
+median_y_salary0 <- median(db$y_salary_m_hu[db$formal == 0], na.rm = TRUE)
 
-db_1 <- db %>% dplyr::select(directorio, secuencia_p, orden, sex, age, ocu, 
-                             oficio, totalHoursWorked,
+db$y_salary_m_hu <- ifelse(is.na(db$y_salary_m_hu) & db$formal == 0, 
+                           median_y_salary0, 
+                           db$y_salary_m_hu)
+
+## We will do the same for formal workers.
+
+median_y_salary1 <- median(db$y_salary_m_hu[db$formal == 1], na.rm = TRUE)
+
+db$y_salary_m_hu <- ifelse(is.na(db$y_salary_m_hu) & db$formal == 1, 
+                           median_y_salary1, 
+                           db$y_salary_m_hu)
+
+db_1 <- db %>% dplyr::select(directorio, secuencia_p, orden, female, age, ocu, 
+                             relab, p6050, totalHoursWorked,
                              formal, sizeFirm, maxEducLevel, y_ingLab_m_ha,
                              y_salary_m_hu)
 
 vis_miss(db_1)
 
-##Looks complete.
+ggplot(db, aes(y_ingLab_m_ha)) +
+  geom_histogram(color = "#000000", fill = "#0099F8") +
+  geom_vline(xintercept = median(db$y_ingLab_m_ha, na.rm = TRUE),
+             linetype = "dashed", 
+             color = "red") +
+  geom_vline(xintercept = mean(db$y_ingLab_m_ha, na.rm = TRUE),
+             linetype = "dashed",
+             color = "blue") +  
+  ggtitle("Distribution of Log Nominal Hourly Salary (COP)") +
+  theme_classic() +
+  theme(plot.title = element_text(size = 18))
 
-#OUTLIERS
+ggplot(db, aes(y_salary_m_hu)) +
+  geom_histogram(color = "#000000", fill = "#0099F8") +
+  geom_vline(xintercept = median(db$y_salary_m_hu, na.rm = TRUE),
+             linetype = "dashed", 
+             color = "red") +
+  geom_vline(xintercept = mean(db$y_salary_m_hu, na.rm = TRUE),
+             linetype = "dashed",
+             color = "blue") +  
+  ggtitle("Distribution of Log Real Hourly Salary (COP)") +
+  theme_classic() +
+  theme(plot.title = element_text(size = 18))
 
-ggplot(data = db,
-       mapping= aes(y= y_ingLab_m_ha, x='')) +
-  theme_bw() +
-  geom_boxplot() +
-  ggtitle("") +
-  ylab ("Nominal Hourly Salaries (COP)") +
-  xlab("")
-
-
+#Looks complete. The distribution for both income variables has now a median 
+#closer to the mean.
 
 # DESCRIPTIVE VARIABLES --------------------------------------------------------
 
 # CATEGORICAL VARIABLES
 
-freq_table_sex <- table(db$sex)
-prop_table_sex <- prop.table(table(db$sex))
-summary_table_sex <- data.frame(
-  Sex = c("0 (Female)", "1 (Male)"),  
-  Count = as.numeric(freq_table_sex),     
-  Proportion = round(as.numeric(prop_table_sex), 4) 
+freq_table_female <- table(db$female)
+prop_table_female <- prop.table(table(db$female))
+summary_table_female <- data.frame(
+  Sex = c("0 (Male)", "1 (Female)"),  
+  Count = as.numeric(freq_table_female),     
+  Proportion = round(as.numeric(prop_table_female), 4) 
 )
-print(summary_table_sex, row.names = FALSE)
+print(summary_table_female, row.names = FALSE)
+
+db <- db %>% #Household head variable created.
+  mutate(H_Head = ifelse( p6050== 1, 1, 0))
+freq_table_HHead <- table(db$H_Head)
+prop_table_HHead <- prop.table(table(db$H_Head))
+summary_table_HHead <- data.frame(
+  HouseholdStatus = c("0 (N/HH)", "1 (Household Head)"),  
+  Count = as.numeric(freq_table_HHead),     
+  Proportion = round(as.numeric(prop_table_HHead), 4) 
+)
+print(summary_table_HHead, row.names = FALSE)
+
+db <- db %>% #Female HH variable created.
+  mutate(Head_Female = Head_Female*(female))
+freq_table_HHeadF <- table(db$Head_Female)
+prop_table_HHeadF <- prop.table(table(db$Head_Female))
+summary_table_HHeadF <- data.frame(
+  HHeadSex = c("0 (N/FHH)", "1 (Female Household Head)"),  
+  Count = as.numeric(freq_table_HHeadF),     
+  Proportion = round(as.numeric(prop_table_HHeadF), 4) 
+)
+print(summary_table_HHeadF, row.names = FALSE)
 
 freq_table_coll <- table(db$college)
 prop_table_coll <- prop.table(table(db$college))
@@ -290,16 +385,16 @@ summary_table <- data.frame(
                      sd(db$y_salary_m_hu, na.rm = TRUE),
                      min(db$y_salary_m_hu, na.rm = TRUE),
                      max(db$y_salary_m_hu, na.rm = TRUE)),
-  age = c(sum(!is.na(db$age)),
-          mean(db$age, na.rm = TRUE),
-          sd(db$age, na.rm = TRUE),
-          min(db$age, na.rm = TRUE),
-          max(db$age, na.rm = TRUE)),
-  totalHoursWorked = c(sum(!is.na(db$age)),
-          mean(db$age, na.rm = TRUE),
-          sd(db$age, na.rm = TRUE),
-          min(db$age, na.rm = TRUE),
-          max(db$age, na.rm = TRUE))
+              age = c(sum(!is.na(db$age)),
+                      mean(db$age, na.rm = TRUE),
+                      sd(db$age, na.rm = TRUE),
+                      min(db$age, na.rm = TRUE),
+                      max(db$age, na.rm = TRUE)),
+              totalHoursWorked = c(sum(!is.na(db$age)),
+                      mean(db$age, na.rm = TRUE),
+                      sd(db$age, na.rm = TRUE),
+                      min(db$age, na.rm = TRUE),
+                      max(db$age, na.rm = TRUE))
 )
 print(summary_table)
 
@@ -324,6 +419,8 @@ plot1 <- ggplot(db, aes(x = age, y = y_ingLab_m_ha,
   ) +
   theme_minimal()
 
+plot1
+
 #Distribution of Hourly Salary by Job Type
 
 plot2 <- ggplot(db, aes(x = as.factor(relab), y = y_ingLab_m_ha)) +
@@ -334,6 +431,8 @@ plot2 <- ggplot(db, aes(x = as.factor(relab), y = y_ingLab_m_ha)) +
     y = "Log Nominal Hourly Salary (COP)"
   ) +
   theme_minimal()
+
+plot2 #Here we can start to identify a lot of observations with significant leverage.
 
 #Density plot of Hourly Salary grouped by access to tertiary education
 
@@ -346,14 +445,16 @@ plot3 <- ggplot(db, aes(x = y_ingLab_m_ha, fill = as.factor(college))) +
   ) +
   theme_minimal()
 
+plot3
+
 #Histogram of Hourly Salary grouped by sex
 
 plot4 <- ggplot(data = db) + 
-  geom_histogram(mapping = aes(x = y_ingLab_m, group = as.factor(sex), 
-                               fill = as.factor(sex)), bins = 30) + 
+  geom_histogram(mapping = aes(x = y_ingLab_m, group = as.factor(female), 
+                               fill = as.factor(female)), bins = 30) + 
   scale_fill_manual(
-    values = c("0" = "purple", "1" = "green"), 
-    labels = c("0" = "Female", "1" = "Male"), 
+    values = c("0" = "green", "1" = "purple"), 
+    labels = c("0" = "Male", "1" = "Female"), 
     name = "Sex"
   ) +
   labs(
@@ -362,6 +463,8 @@ plot4 <- ggplot(data = db) +
     y = "Count"
   ) +
   theme_minimal()
+
+plot4
 
 #Employment Types for People with a College Degree OJO PONER MAS BONITO
 
@@ -379,3 +482,85 @@ plot5 <- ggplot(data = db) +
     y = "Number of People"
   ) +
   theme_minimal() 
+
+plot5
+
+#Total hours worked by female household head-ship status
+
+
+plot6 <- ggplot(db, aes(x = as.factor(Head_Female), y = totalHoursWorked)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(
+    title = "Distribution of Hourly Salary by Job Type",
+    x = "Job Type",
+    y = "Log Nominal Hourly Salary (COP)"
+  ) +
+  theme_minimal()
+
+plot6 
+
+
+# AGE-WAGE PROFILFE ------------------------------------------------------------
+
+db <- db %>% mutate(age2= age^2)
+
+model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
+
+
+model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
+
+stargazer(model1, model2, type="text",
+           covariate.labels=c("Age","Agesq"))
+
+residualsmodel1 <- residuals(model1)
+residualsmodel2 <- residuals(model2)
+
+ggplot(data= db, 
+       mapping = aes(x=residualsmodel1)) +
+  theme_bw() + 
+  geom_density() 
+
+ggplot(data= db, 
+       mapping = aes(x=residualsmodel2)) +
+  theme_bw() + 
+  geom_density() 
+
+ggplot(db , aes(y = residualsmodel1 , x = orden )) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+ggplot(db , aes(y = residualsmodel2 , x = orden )) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+db<-db %>% mutate(m1_std_residuals= studres(model1) )
+db<-db %>% mutate(m2_std_residuals= studres(model2) )
+
+
+ggplot(db , aes(y = m1_std_residuals , x = orden)) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+db <- db %>% 
+  filter(m1_std_residuals < 2 & m1_std_residuals > -2 & 
+           m2_std_residuals < 2 & m2_std_residuals > -2)
+
+
+model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
+
+
+model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
+
+stargazer(model1, model2, type="text",
+          covariate.labels=c("Age","Squared Age"))
+
+
