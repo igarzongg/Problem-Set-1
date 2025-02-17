@@ -507,14 +507,23 @@ db <- db %>% mutate(age2= age^2)
 
 model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
 
-
 model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
 
-stargazer(model1, model2, type="text",
+model3 <- lm(y_salary_m_hu  ~ age + age2, data= db)
+
+model4 <- lm(y_salary_m_hu  ~ age, data= db)
+
+stargazer(model1, model2, type="text", #Model results for Nominal Hourly Wage
            covariate.labels=c("Age","Agesq"))
+
+stargazer(model1, model2, type="text", #Model results for Real Hourly Wage
+          covariate.labels=c("Age","Agesq"))
 
 residualsmodel1 <- residuals(model1)
 residualsmodel2 <- residuals(model2)
+
+residualsmodel3 <- residuals(model3)
+residualsmodel4 <- residuals(model4)
 
 ggplot(data= db, 
        mapping = aes(x=residualsmodel1)) +
@@ -523,6 +532,16 @@ ggplot(data= db,
 
 ggplot(data= db, 
        mapping = aes(x=residualsmodel2)) +
+  theme_bw() + 
+  geom_density() 
+
+ggplot(data= db, 
+       mapping = aes(x=residualsmodel3)) +
+  theme_bw() + 
+  geom_density() 
+
+ggplot(data= db, 
+       mapping = aes(x=residualsmodel4)) +
   theme_bw() + 
   geom_density() 
 
@@ -540,8 +559,26 @@ ggplot(db , aes(y = residualsmodel2 , x = orden )) +
        y = "Residuals",
        title = "") # labels
 
+ggplot(db , aes(y = residualsmodel3 , x = orden )) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+ggplot(db , aes(y = residualsmodel4 , x = orden )) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+
 db<-db %>% mutate(m1_std_residuals= studres(model1) )
 db<-db %>% mutate(m2_std_residuals= studres(model2) )
+
+db<-db %>% mutate(m3_std_residuals= studres(model3) )
+db<-db %>% mutate(m4_std_residuals= studres(model4) )
 
 
 ggplot(db , aes(y = m1_std_residuals , x = orden)) +
@@ -551,10 +588,33 @@ ggplot(db , aes(y = m1_std_residuals , x = orden)) +
        y = "Residuals",
        title = "") # labels
 
+ggplot(db , aes(y = m2_std_residuals , x = orden)) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+ggplot(db , aes(y = m3_std_residuals , x = orden)) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+ggplot(db , aes(y = m4_std_residuals , x = orden)) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
 db <- db %>% 
   filter(m1_std_residuals < 2 & m1_std_residuals > -2 & 
-           m2_std_residuals < 2 & m2_std_residuals > -2)
+           m2_std_residuals < 2 & m2_std_residuals > -2 & m3_std_residuals < 2 & m3_std_residuals > -2 & 
+           m4_std_residuals < 2 & m4_std_residuals > -2)
 
+## Estimation procedure for NOMINAL Hourly Wage --------------------------------
 
 model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
 
@@ -584,10 +644,9 @@ summ <- db %>%
     yhat_reg2 = mean(yhat2), .groups="drop"
   ) 
 
-
 head(summ)
 
-## Graph displaying relationship between variables
+## Graph displaying relationship between variables (NOMINAL hourly wage)
 
 ggplot(summ) + 
   geom_point(
@@ -604,9 +663,9 @@ ggplot(summ) +
     
   ) +
   labs(
-    title = "ln Hourly Wages by Age in the GEIH",
+    title = "ln NOMINAL Hourly Wages by Age in the GEIH",
     x = "Age",
-    y = "ln Hourly Wages"
+    y = "ln NOMINAL Hourly Wages"
   ) +
   theme_bw()
 
@@ -636,11 +695,128 @@ length(estimates_model1)
 
 plot(hist(estimates_model1))
 
-mean(estimates_model1)
+meanpeakage <- mean(estimates_model1)
 
-sqrt(var(estimates_model1))
+sepeakage <- sqrt(var(estimates_model1))
 
-confint(estimates_model1, level=0.95) #CI from Bootstrap Distribution with (B=1000)
+ci_lower <- quantile(estimates_model1, 0.025)
+ci_upper <- quantile(estimates_model1, 0.975)
+
+## Estimation procedure for REAL Hourly Wage --------------------------------
+
+model3 <- lm(y_salary_m_hu  ~ age + age2, data= db)
+
+# Extract coefficients
+beta1r <- coef(model3)["age"]
+beta2r <- coef(model3)["age2"]
+
+# Compute the age at which income is maximized
+age_maxr <- -beta1r / (2 * beta2r)
+
+age_maxr #Income is maximized at this age 
+
+model4 <- lm(y_salary_m_hu  ~ age, data= db)
+
+stargazer(model3, model4, type="text",
+          covariate.labels=c("Age","Squared Age"))
+
+db <- db  %>% mutate(yhat1r=predict(model3), yhat2r=predict(model4)) 
+
+summ <- db %>%  
+  group_by(
+    age, age2
+  ) %>%  
+  summarize(
+    mean_yr = mean(y_salary_m_hu),
+    yhat_reg1r = mean(yhat1r),
+    yhat_reg2r = mean(yhat2r), .groups="drop"
+  ) 
+
+head(summ)
+
+## Graph displaying relationship between variables (NOMINAL hourly wage)
+
+ggplot(summ) + 
+  geom_point(
+    aes(x = age, y = mean_yr),
+    color = "blue", size = 2
+  ) + 
+  geom_line(
+    aes(x = age, y = yhat_reg1r), 
+    color = "green", linewidth = 1.5
+  ) + 
+  geom_line(
+    aes(x= age, y= yhat_reg2r),
+    color = "orange", linewidth = 1.5
+    
+  ) +
+  labs(
+    title = "ln REAL Hourly Wages by Age in the GEIH",
+    x = "Age",
+    y = "ln REAL Hourly Wages"
+  ) +
+  theme_bw()
+
+## Finding the 'peak-age' with CI's according by bootstrapping the the model
+
+set.seed(101111)
+
+B <- 1000
+
+estimates_model3<-rep(NA,B)
+
+for(i in 1:B){
+  
+  db_sample<- sample_frac(db,size=1,replace=TRUE) #takes a sample with replacement of the same size of the original sample (1 or 100%)
+  
+  model3 <- lm(y_salary_m_hu  ~ age + age2, db_sample)
+  
+  beta1r<-model3$coefficients[2] # gets the coefficient of interest 
+  beta2r <- model3$coefficients[3]
+  
+  age_maxbr <- -beta1r / (2 * beta2r)
+  
+  estimates_model3[i]<- age_maxbr #saves it in the above vector
+}
+
+length(estimates_model3)
+
+plot(hist(estimates_model3))
+
+meanpeakager <- mean(estimates_model3)
+
+sepeakager <- sqrt(var(estimates_model3))
+
+ci_lowerr <- quantile(estimates_model3, 0.025)
+ci_upperr <- quantile(estimates_model3, 0.975)
+
+## Creating the summary table(s) with the relevant estimate statistics
+
+summary_table <- data.frame(
+  Statistic = c("Bootstrap Mean", "Standard Error", "Lower 95% CI",
+                "Upper 95% CI", "Original OLS Peak Age"),
+  Value = c(meanpeakage, sepeakage, ci_lower, ci_upper, age_max)
+)
+
+stargazer(summary_table, summary = FALSE, type = "text", 
+          title = "Bootstrap Model1 Estimates of Peak Age and Comparison with Original", digits = 2)
+
+summary_table2 <- data.frame(
+  Statistic = c("Bootstrap Mean", "Standard Error", "Lower 95% CI",
+                "Upper 95% CI", "Original OLS Peak Age"),
+  Value = c(meanpeakager, sepeakager, ci_lowerr, ci_upperr, age_max)
+)
+
+stargazer(summary_table2, summary = FALSE, type = "text", 
+          title = "Bootstrap Model3 Estimates of Peak Age and Comparison with Original", digits = 2)
+
+
+# GENDER-EARNINGS GAP ----------------------------------------------------------
+
+#a).
+
+
+
 
 
 
