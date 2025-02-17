@@ -312,15 +312,20 @@ summary_table_HHeadF <- data.frame(
 )
 print(summary_table_HHeadF, row.names = FALSE)
 
-freq_table_coll <- table(db$college)
-prop_table_coll <- prop.table(table(db$college))
-summary_table_coll <- data.frame(
-  Academic_achievement = c("0 (Below Tertiary Education)", 
-                           "1 (Tertiary Education or more)"),  
-  Count = as.numeric(freq_table_coll),     
-  Proportion = round(as.numeric(prop_table_coll), 4)  
+freq_table_educ <- table(db$maxEducLevel)
+prop_table_educ <- prop.table(table(db$maxEducLevel))
+summary_table_educ <- data.frame(
+  Academic_achievement = c("1 (None)", 
+                           "2 (Tertiary Education or more)",
+                           "3 (Primary incomplete)",
+                           "4 (Primary complete)",
+                           "5 (Secondary incomplete)",
+                           "6 (Secondary complete)",
+                           "7 (Terciary)"),  
+  Count = as.numeric(freq_table_educ),     
+  Proportion = round(as.numeric(prop_table_educ), 4)  
 )
-print(summary_table_coll, row.names = FALSE)
+print(summary_table_educ, row.names = FALSE)
 
 freq_table_form <- table(db$formal)
 prop_table_form <- prop.table(table(db$formal))
@@ -433,16 +438,16 @@ plot2 <- ggplot(db, aes(x = as.factor(relab), y = y_ingLab_m_ha)) +
   ) +
   theme_minimal()
 
-plot2 #Here we can start to identify a lot of observations with significant leverage.
+plot2 #Here we can start to identify a lot of observations with high leverage.
 
 #Density plot of Hourly Salary grouped by access to tertiary education
 
-plot3 <- ggplot(db, aes(x = y_ingLab_m_ha, fill = as.factor(college))) +
+plot3 <- ggplot(db, aes(x = y_ingLab_m_ha, fill = as.factor(maxEducLevel))) +
   geom_density(alpha = 0.5) +
   labs(
-    title = "Hourly Salary Distribution by College Education",
+    title = "Hourly Salary Distribution by Education Level",
     x = "Log Nominal Hourly Salary (COP)",
-    fill = "College (0 = No, 1 = Yes)"
+    fill = "Education Level"
   ) +
   theme_minimal()
 
@@ -467,24 +472,7 @@ plot4 <- ggplot(data = db) +
 
 plot4
 
-#Employment Types for People with a College Degree OJO PONER MAS BONITO
-
-plot5 <- ggplot(data = db) + 
-  geom_bar(mapping = aes(x = relab, group = as.factor(college),
-                         fill = as.factor(college)), width = 0.7) + 
-  scale_fill_manual(
-    values = c("Yes" = "blue", "No" = "red"), 
-    labels = c("Yes" = "College Degree", "No" = "No College Degree"), 
-    name = "College Degree"
-  ) +
-  labs(
-    title = "Employment Types for People with a College Degree",
-    x = "Employment Type",
-    y = "Number of People"
-  ) +
-  theme_minimal() 
-
-plot5
+#PONER MAS GRAFICOS
 
 #Total hours worked by female household head-ship status
 
@@ -492,8 +480,8 @@ plot5
 plot6 <- ggplot(db, aes(x = as.factor(Head_Female), y = totalHoursWorked)) +
   geom_boxplot(fill = "skyblue", color = "black") +
   labs(
-    title = "Distribution of Hourly Salary by Job Type",
-    x = "Job Type",
+    title = "Total Hours Worked comparison with Female Household Heads",
+    x = "(0) Not Female HH (1) Female HH",
     y = "Log Nominal Hourly Salary (COP)"
   ) +
   theme_minimal()
@@ -611,7 +599,8 @@ ggplot(db , aes(y = m4_std_residuals , x = orden)) +
 
 db <- db %>% 
   filter(m1_std_residuals < 2 & m1_std_residuals > -2 & 
-           m2_std_residuals < 2 & m2_std_residuals > -2 & m3_std_residuals < 2 & m3_std_residuals > -2 & 
+           m2_std_residuals < 2 & m2_std_residuals > -2 & m3_std_residuals 
+         < 2 & m3_std_residuals > -2 & 
            m4_std_residuals < 2 & m4_std_residuals > -2)
 
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
@@ -630,7 +619,9 @@ age_max #Income is maximized at this age
 model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
 
 stargazer(model1, model2, type="text",
-          covariate.labels=c("Age","Squared Age"))
+          covariate.labels=c("Age","Squared Age"), 
+          dep.var.labels = "Log Nominal Hourly Wage)", 
+          title = 'Quadratic vs Linear model')
 
 db <- db  %>% mutate(yhat1=predict(model1), yhat2=predict(model2)) 
 
@@ -679,7 +670,8 @@ estimates_model1<-rep(NA,B)
 
 for(i in 1:B){
   
-  db_sample<- sample_frac(db,size=1,replace=TRUE) #takes a sample with replacement of the same size of the original sample (1 or 100%)
+  db_sample<- sample_frac(db,size=1,replace=TRUE) 
+#takes a sample with replacement of the same size of the original sample 
   
   model1 <- lm(y_ingLab_m_ha  ~ age + age2, db_sample)
   
@@ -702,7 +694,7 @@ sepeakage <- sqrt(var(estimates_model1))
 ci_lower <- quantile(estimates_model1, 0.025)
 ci_upper <- quantile(estimates_model1, 0.975)
 
-## Estimation procedure for REAL Hourly Wage --------------------------------
+## Estimation procedure for REAL Hourly Wage -----------------------------------
 
 model3 <- lm(y_salary_m_hu  ~ age + age2, data= db)
 
@@ -718,7 +710,9 @@ age_maxr #Income is maximized at this age
 model4 <- lm(y_salary_m_hu  ~ age, data= db)
 
 stargazer(model3, model4, type="text",
-          covariate.labels=c("Age","Squared Age"))
+          covariate.labels=c("Age","Squared Age"), 
+          dep.var.labels = "Log Real Hourly Wage", 
+          title = 'Quadratic vs Linear model')
 
 db <- db  %>% mutate(yhat1r=predict(model3), yhat2r=predict(model4)) 
 
@@ -767,7 +761,8 @@ estimates_model3<-rep(NA,B)
 
 for(i in 1:B){
   
-  db_sample<- sample_frac(db,size=1,replace=TRUE) #takes a sample with replacement of the same size of the original sample (1 or 100%)
+  db_sample<- sample_frac(db,size=1,replace=TRUE) 
+#takes a sample with replacement of the same size of the original sample.
   
   model3 <- lm(y_salary_m_hu  ~ age + age2, db_sample)
   
@@ -799,7 +794,8 @@ summary_table <- data.frame(
 )
 
 stargazer(summary_table, summary = FALSE, type = "text", 
-          title = "Bootstrap Model1 Estimates of Peak Age and Comparison with Original", digits = 2)
+          title = "Bootstrap Model1 Estimates of Peak Age 
+          and Comparison with Original", digits = 2)
 
 summary_table2 <- data.frame(
   Statistic = c("Bootstrap Mean", "Standard Error", "Lower 95% CI",
@@ -808,13 +804,39 @@ summary_table2 <- data.frame(
 )
 
 stargazer(summary_table2, summary = FALSE, type = "text", 
-          title = "Bootstrap Model3 Estimates of Peak Age and Comparison with Original", digits = 2)
+          title = "Bootstrap Model3 Estimates of Peak Age
+          and Comparison with Original", digits = 2)
 
 
 # GENDER-EARNINGS GAP ----------------------------------------------------------
 
 #a).
 
+model5 <- lm(y_ingLab_m_ha  ~ female, data= db)
+
+stargazer(model5, type="text", 
+          covariate.labels=c("Female"), 
+          dep.var.labels = "Log Nominal Hourly Wage", 
+          title = 'Unconditional Wage Gap Model')
+
+model6 <- lm(y_salary_m_hu  ~ female, data= db)
+
+stargazer(model6, type="text", 
+          covariate.labels=c("Female"), 
+          dep.var.labels = "Log Real Hourly Wage", 
+          title = 'Unconditional Wage Gap Model')
+
+#b).
+
+model7 <- lm(y_ingLab_m_ha ~ female + age  + relab + Head_Female +
+            totalHoursWorked + formal + sizeFirm + maxEducLevel, data=db)
+
+stargazer(model7, type="text", 
+          covariate.labels=c("Female", "Age", "Employment Sector",
+                             "Female Household Head", "Total Hours Worked", 
+                             "Formal", "Size of Firm", "Max. Education Level"), 
+          dep.var.labels = "Log Nominal Hourly Wage", 
+          title = 'Conditional Wage Gap Model')
 
 
 
