@@ -18,6 +18,7 @@ p_load(rio,
        caret,
        boot,
        MASS,
+       mosaic,
        lintr)
 
 # IMPORTING DATABASES ----------------------------------------------------------
@@ -301,7 +302,7 @@ summary_table_HHead <- data.frame(
 print(summary_table_HHead, row.names = FALSE)
 
 db <- db %>% #Female HH variable created.
-  mutate(Head_Female = Head_Female*(female))
+  mutate(Head_Female = H_Head*(female))
 freq_table_HHeadF <- table(db$Head_Female)
 prop_table_HHeadF <- prop.table(table(db$Head_Female))
 summary_table_HHeadF <- data.frame(
@@ -557,10 +558,91 @@ db <- db %>%
 
 model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
 
+# Extract coefficients
+beta1 <- coef(model1)["age"]
+beta2 <- coef(model1)["age2"]
+
+# Compute the age at which income is maximized
+age_max <- -beta1 / (2 * beta2)
+
+age_max #Income is maximized at this age 
 
 model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
 
 stargazer(model1, model2, type="text",
           covariate.labels=c("Age","Squared Age"))
+
+db <- db  %>% mutate(yhat1=predict(model1), yhat2=predict(model2)) 
+
+summ <- db %>%  
+  group_by(
+    age, age2
+  ) %>%  
+  summarize(
+    mean_y = mean(y_ingLab_m_ha),
+    yhat_reg1 = mean(yhat1),
+    yhat_reg2 = mean(yhat2), .groups="drop"
+  ) 
+
+
+head(summ)
+
+## Graph displaying relationship between variables
+
+ggplot(summ) + 
+  geom_point(
+    aes(x = age, y = mean_y),
+    color = "blue", size = 2
+  ) + 
+  geom_line(
+    aes(x = age, y = yhat_reg1), 
+    color = "green", linewidth = 1.5
+  ) + 
+  geom_line(
+    aes(x= age, y= yhat_reg2),
+    color = "orange", lindewidth = 1.5
+    
+  ) +
+  labs(
+    title = "ln Hourly Wages by Age in the GEIH",
+    x = "Age",
+    y = "ln Hourly Wages"
+  ) +
+  theme_bw()
+
+## Finding the 'peak-age' with CI's according by bootstrapping the the model
+
+set.seed(101110)
+
+B <- 1000
+
+estimates_model1<-rep(NA,B)
+
+for(i in 1:B){
+  
+  db_sample<- sample_frac(db,size=1,replace=TRUE) #takes a sample with replacement of the same size of the original sample (1 or 100%)
+  
+  model1 <- lm(y_ingLab_m_ha  ~ age + age2, db_sample)
+  
+  beta1<-model1$coefficients[2] # gets the coefficient of interest 
+  beta2 <- model1$coefficients[3]
+  
+  age_maxb <- -beta1 / (2 * beta2)
+  
+  estimates_model1[i]<- age_maxb #saves it in the above vector
+}
+
+length(estimates_model1)
+
+plot(hist(estimates_model1))
+
+mean(estimates_model1)
+
+sqrt(var(estimates_model1))
+
+confint(estimates_model1, level=0.95) #CI from Bootstrap Distribution with (B=1000)
+
+
+
 
 
