@@ -1152,7 +1152,7 @@ for(i in 1:B){
 
   #Residuals of regression female ~ X 
   
-  oghwageResidXbs <- lm(y_ingLab_m_ha~ age +
+  loghwageResidXbs <- lm(y_ingLab_m_ha~ age +
                                         age2 + relab + Head_Female +
                                         totalHoursWorked + formal + 
                                   sizeFirm + maxEducLevel, 
