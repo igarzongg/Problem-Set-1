@@ -628,40 +628,76 @@ stargazer(model1, model2, type="text",
 
 db <- db  %>% mutate(yhat1=predict(model1), yhat2=predict(model2)) 
 
-summ <- db %>%  
-  group_by(
-    age, age2
-  ) %>%  
-  summarize(
-    mean_y = mean(y_ingLab_m_ha),
-    yhat_reg1 = mean(yhat1),
-    yhat_reg2 = mean(yhat2), .groups="drop"
-  ) 
-
-head(summ)
-
-## Graph displaying relationship between variables (NOMINAL hourly wage)
-
-ggplot(summ) + 
-  geom_point(
-    aes(x = age, y = mean_y),
-    color = "blue", size = 2
-  ) + 
-  geom_line(
-    aes(x = age, y = yhat_reg1), 
-    color = "green", linewidth = 1.5
-  ) + 
-  geom_line(
-    aes(x= age, y= yhat_reg2),
-    color = "orange", lindewidth = 1.5
+# Compute standard errors for confidence intervals
+summ <- summ %>%
+  mutate(
+    se_yhat1 = sd(yhat_reg1, na.rm = TRUE) / sqrt(n()),
+    lower_yhat1 = yhat_reg1 - 1.96 * se_yhat1,
+    upper_yhat1 = yhat_reg1 + 1.96 * se_yhat1,
     
+    se_yhat2 = sd(yhat_reg2, na.rm = TRUE) / sqrt(n()),
+    lower_yhat2 = yhat_reg2 - 1.96 * se_yhat2,
+    upper_yhat2 = yhat_reg2 + 1.96 * se_yhat2
+  )
+
+# Graphing with confidence intervals and proper formatting
+ggplot() + 
+  # Scatter plot of observed mean hourly wages
+  geom_point(
+    data = summ, 
+    aes(x = age, y = mean_y),
+    color = "blue", size = 2, alpha = 0.5
+  ) + 
+  
+  # Confidence interval for Model 1
+  geom_ribbon(
+    data = summ, 
+    aes(x = age, ymin = lower_yhat1, ymax = upper_yhat1, fill = "Model 1"),
+    alpha = 0.2
   ) +
+  
+  # Line for Model 1
+  geom_line(
+    data = summ, 
+    aes(x = age, y = yhat_reg1, color = "Model 1"),
+    linewidth = 1.5
+  ) + 
+  
+  # Confidence interval for Model 2
+  geom_ribbon(
+    data = summ, 
+    aes(x = age, ymin = lower_yhat2, ymax = upper_yhat2, fill = "Model 2"),
+    alpha = 0.2
+  ) +
+  
+  # Line for Model 2
+  geom_line(
+    data = summ, 
+    aes(x = age, y = yhat_reg2, color = "Model 2"),
+    linewidth = 1.5
+  ) +
+  
+  # Labels and title
   labs(
-    title = "ln NOMINAL Hourly Wages by Age in the GEIH",
+    title = "Predicted Age-Wage Profile with Confidence Intervals",
+    subtitle = "Based on two different regression models",
     x = "Age",
-    y = "ln NOMINAL Hourly Wages"
+    y = "Log Nominal Hourly Wages",
+    color = "Model",
+    fill = "Confidence Interval",
+    caption = "Note: The dots represent observed mean wages,
+    while the lines indicate predicted wages from two models.\nShaded areas 
+    represent 95% confidence intervals."
   ) +
-  theme_bw()
+  
+  # Custom theme
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 11)
+  )
+
 
 ## Finding the 'peak-age' with CI's according by bootstrapping the the model
 
@@ -731,28 +767,78 @@ summ <- db %>%
 
 head(summ)
 
-## Graph displaying relationship between variables (NOMINAL hourly wage)
+## Graph displaying relationship between variables (REAL hourly wage)
 
-ggplot(summ) + 
-  geom_point(
-    aes(x = age, y = mean_yr),
-    color = "blue", size = 2
-  ) + 
-  geom_line(
-    aes(x = age, y = yhat_reg1r), 
-    color = "green", linewidth = 1.5
-  ) + 
-  geom_line(
-    aes(x= age, y= yhat_reg2r),
-    color = "orange", linewidth = 1.5
+# Compute standard errors for confidence intervals
+summ <- summ %>%
+  mutate(
+    se_yhat1r = sd(yhat_reg1r, na.rm = TRUE) / sqrt(n()),
+    lower_yhat1r = yhat_reg1r - 1.96 * se_yhat1r,
+    upper_yhat1r = yhat_reg1r + 1.96 * se_yhat1r,
     
+    se_yhat2r = sd(yhat_reg2r, na.rm = TRUE) / sqrt(n()),
+    lower_yhat2r = yhat_reg2r - 1.96 * se_yhat2r,
+    upper_yhat2r = yhat_reg2r + 1.96 * se_yhat2r
+  )
+
+# Graphing with confidence intervals and proper formatting
+ggplot() + 
+  # Scatter plot of observed real hourly wages
+  geom_point(
+    data = summ, 
+    aes(x = age, y = mean_yr),
+    color = "blue", size = 2, alpha = 0.5
+  ) + 
+  
+  # Confidence interval for Model 1
+  geom_ribbon(
+    data = summ, 
+    aes(x = age, ymin = lower_yhat1r, ymax = upper_yhat1r, fill = "Model 1"),
+    alpha = 0.2
   ) +
+  
+  # Line for Model 1
+  geom_line(
+    data = summ, 
+    aes(x = age, y = yhat_reg1r, color = "Model 1"),
+    linewidth = 1.5
+  ) + 
+  
+  # Confidence interval for Model 2
+  geom_ribbon(
+    data = summ, 
+    aes(x = age, ymin = lower_yhat2r, ymax = upper_yhat2r, fill = "Model 2"),
+    alpha = 0.2
+  ) +
+  
+  # Line for Model 2
+  geom_line(
+    data = summ, 
+    aes(x = age, y = yhat_reg2r, color = "Model 2"),
+    linewidth = 1.5
+  ) +
+  
+  # Labels and title
   labs(
-    title = "ln REAL Hourly Wages by Age in the GEIH",
+    title = "Predicted Age-Wage Profile (REAL Wages) with Confidence Intervals",
+    subtitle = "Based on two different regression models",
     x = "Age",
-    y = "ln REAL Hourly Wages"
+    y = "Log Real Hourly Wages",
+    color = "Model",
+    fill = "Confidence Interval",
+    caption = "Note: The dots represent observed mean real wages, 
+    while the lines indicate predicted wages from two models.\nShaded 
+    areas represent 95% confidence intervals."
   ) +
-  theme_bw()
+  
+  # Theme
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 11)
+  )
+
 
 ## Finding the 'peak-age' with CI's according by bootstrapping the the model
 
@@ -796,19 +882,23 @@ summary_table <- data.frame(
   Value = c(meanpeakage, sepeakage, ci_lower, ci_upper, age_max)
 )
 
-stargazer(summary_table, summary = FALSE, type = "text", 
-          title = "Bootstrap Model1 Estimates of Peak Age 
-          and Comparison with Original", digits = 2)
-
 summary_table2 <- data.frame(
   Statistic = c("Bootstrap Mean", "Standard Error", "Lower 95% CI",
                 "Upper 95% CI", "Original OLS Peak Age"),
   Value = c(meanpeakager, sepeakager, ci_lowerr, ci_upperr, age_max)
 )
 
-stargazer(summary_table2, summary = FALSE, type = "text", 
-          title = "Bootstrap Model3 Estimates of Peak Age
-          and Comparison with Original", digits = 2)
+# Create merged summary table
+merged_table <- data.frame(
+  Statistic = summary_table$Statistic,  # Keeping Statistic names
+  Nominal_Value = summary_table$Value,  # Values from first table
+  Real_Value = summary_table2$Value     # Values from second table
+)
+
+# Print merged table 
+stargazer(merged_table, summary = FALSE, type = "text",
+          title = "Comparison of Nominal and Real Bootstrap Estimates", 
+          digits = 2)
 
 
 # GENDER-EARNINGS GAP ----------------------------------------------------------
@@ -831,25 +921,27 @@ stargazer(model6, type="text",
 
 #b).
 
-model7 <- lm(y_ingLab_m_ha ~ female + age  + relab + Head_Female +
+model7 <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
             totalHoursWorked + formal + sizeFirm + maxEducLevel, data=db)
 
-stargazer(model7, type="text", 
-          covariate.labels=c("Female", "Age", "Employment Sector",
+
+stargazer(model5, model7, type="text", 
+          covariate.labels=c("Female", "Age", 'Age2', "Employment Sector",
                              "Female Household Head", "Total Hours Worked", 
                              "Formal", "Size of Firm", "Max. Education Level"), 
           dep.var.labels = "Log Nominal Hourly Wage", 
-          title = 'Conditional Wage Gap Model')
+          title = 'Unconditional vs.Conditional Wage Gap Model')
 
 
 #FWL ---------------------------------------------------------------------------
 
-db<-db %>% mutate(femaleResidX=lm(female~ age  + relab + Head_Female +
+db<-db %>% mutate(femaleResidX=lm(female~ age + age2 + relab + Head_Female +
                                     totalHoursWorked + formal + 
                                     sizeFirm + maxEducLevel, db)$residuals) 
 #Residuals of regression female ~ X 
 
-db<-db %>% mutate(loghwageResidX=lm(y_ingLab_m_ha~ age  + relab + Head_Female +
+db<-db %>% mutate(loghwageResidX=lm(y_ingLab_m_ha~ age + age2  
+                                    + relab + Head_Female +
                                     totalHoursWorked + formal + 
                                     sizeFirm + maxEducLevel, db)$residuals) 
 
@@ -878,8 +970,227 @@ sqrt(diag(vcov(model7)))[2] #Degrees of freedom have been succesfully adjusted.
 
 
 
+#FWL WITH BOOTSTRAP ------------------------------------------------------------
+
+#Displaying regression and y_hat function by sex:
+
+model7men <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
+               totalHoursWorked + formal + sizeFirm + maxEducLevel, data=db,
+             subset = (female == 0))
+
+model7females <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
+                    totalHoursWorked + formal + sizeFirm + maxEducLevel,
+                    data=db,
+                  subset = (female == 1))
+
+# Create predicted values with NA for the opposite gender
+db <- db %>%
+  mutate(yhat1men = ifelse(female == 0, predict(model7men, newdata = db), NA),
+         yhat2females = ifelse(female == 1, 
+                               predict(model7females, newdata = db), NA))
 
 
+summ2 <- db %>%  
+  group_by(
+    female, age, age2
+  ) %>%  
+  summarize(
+    mean_hourly_salary= mean(y_salary_m_hu),#Mean hourly salary for  sample
+    yhat_reg7men = mean(yhat1men), #Predicted avg. hourly salary for this male
+    yhat_reg7females = mean(yhat2females), .groups="drop"
+  ) #Predicted avg. hourly salary for this female
+
+head(summ2) #Data for males
+tail(summ2) #Data for females
+
+#GRAPHING
+
+# Compute standard errors for confidence intervals
+summ2_men <- summ2_men %>%
+  mutate(se = sd(yhat_reg7men, na.rm = TRUE) / sqrt(n()),
+         lower = yhat_reg7men - 1.96 * se,
+         upper = yhat_reg7men + 1.96 * se)
+
+summ2_females <- summ2_females %>%
+  mutate(se = sd(yhat_reg7females, na.rm = TRUE) / sqrt(n()),
+         lower = yhat_reg7females - 1.96 * se,
+         upper = yhat_reg7females + 1.96 * se)
+
+# Graphing with confidence intervals and proper labels
+ggplot() + 
+  # Scatter plot of actual mean hourly salary
+  geom_point(data = summ2, aes(x = age, y = mean_hourly_salary), 
+             color = "blue", size = 2, alpha = 0.5) + 
+  
+  # Confidence interval for males
+  geom_ribbon(data = summ2_men, 
+              aes(x = age, ymin = lower, ymax = upper), 
+              fill = "red", alpha = 0.2) +
+  
+  # Line for males
+  geom_line(data = summ2_men, 
+            aes(x = age, y = yhat_reg7men, color = "Males"), 
+            linewidth = 1.5) + 
+  
+  # Confidence interval for females
+  geom_ribbon(data = summ2_females, 
+              aes(x = age, ymin = lower, ymax = upper), 
+              fill = "purple", alpha = 0.2) +
+  
+  # Line for females
+  geom_line(data = summ2_females, 
+            aes(x = age, y = yhat_reg7females, color = "Females"), 
+            linewidth = 1.5) +
+  
+  # Labels and title
+  labs(
+    title = "Predicted Age-Wage Profile with Confidence Intervals by Sex",
+    subtitle = "Based on regression models estimated separately for
+    males and females",
+    x = "Age",
+    y = "Log Nominal Hourly Wages",
+    color = "Sex",
+    caption = "Note: Predicted values are 
+    from separate regressions for males and females.\nConfidence 
+    intervals represent 95% uncertainty bands."
+  ) +
+  
+ #Theme
+  theme_bw() +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 11))
 
 
+#BOOTSTRAPPING
+
+set.seed(101112)
+
+B <- 1000
+
+estimates_FWLmodel7<-rep(NA,B)
+
+agesmax_FWLmodel7men<-rep(NA,B)
+agesmax_FWLmodel7females<-rep(NA,B)
+
+
+for(i in 1:B){
+  
+  
+  db_sample<- sample_frac(db,size=1,replace=TRUE) 
+  
+  #takes a sample with replacement of the same size of the original sample.
+  
+  db<-db %>% mutate(femaleResidXbs=lm(female~ age + age2+ relab + Head_Female +
+                                      totalHoursWorked + formal + 
+                                      sizeFirm + maxEducLevel,
+                                      data = db_sample)$residuals) 
+  #Residuals of regression female ~ X 
+  
+  db<-db %>% mutate(loghwageResidXbs=lm(y_ingLab_m_ha~ age +
+                                        age2 + relab + Head_Female +
+                                        totalHoursWorked + formal + 
+                                  sizeFirm + maxEducLevel, 
+                                  data =db_sample)$residuals) 
+  
+  #Residuals of regression log nominal hourly wage ~ X 
+  
+  modelRESFWLbs <- lm(loghwageResidXbs~femaleResidXbs, db_sample)
+  
+  model7bsmen <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
+                 totalHoursWorked + formal + sizeFirm + maxEducLevel, 
+                 subset = (female == 0 ),
+                 data=db_sample)
+  
+  model7bsfemales <- lm(y_ingLab_m_ha ~ female + age +age2 + 
+                          relab + Head_Female +
+                      totalHoursWorked + formal + sizeFirm + maxEducLevel, 
+                    subset = (female == 1 ),
+                    data=db_sample)
+  
+  beta1RES_fwlbs <-modelRESFWLbs$coefficients[2] 
+  # gets the coefficient of interest 
+  
+  beta1_fwlbsmen <- model7bsmen$coefficients[3]
+  beta2_fwlbsmen <- model7bsmen$coefficients[4]
+  
+  beta1_fwlbsfemales <- model7bsfemales$coefficients[3]
+  beta2_fwlbsfemales <- model7bsfemales$coefficients[4]
+  
+  age_maxbbsmen <- -beta1_fwlbsmen / (2 * beta2_fwlbsmen)
+  age_maxbbsfemales <- -beta1_fwlbsfemales / (2 * beta2_fwlbsfemales)
+  
+  estimates_FWLmodel7[i] <- beta1RES_fwlbs
+  
+  agesmax_FWLmodel7men[i]<- age_maxbbsmen #saves it in the above vector
+  agesmax_FWLmodel7females[i]<- age_maxbbsfemales
+}
+
+length(estimates_FWLmodel7)
+
+length(agesmax_FWLmodel7men)
+length(agesmax_FWLmodel7females)
+
+plot(hist(estimates_FWLmodel7))
+
+plot(hist(agesmax_FWLmodel7men))
+plot(hist(agesmax_FWLmodel7females))
+
+meancoefFWLbs <- mean(estimates_FWLmodel7)
+
+meanpeakagebsmen <- mean(agesmax_FWLmodel7men)
+meanpeakagebsfemales <- mean(agesmax_FWLmodel7females)
+
+secoefFWLbs <- sqrt(var(estimates_FWLmodel7))
+
+sepeakagebsmen <- sqrt(var(agesmax_FWLmodel7men))
+sepeakagebsfemales <- sqrt(var(agesmax_FWLmodel7females))
+
+ci_lowercoefFWLbs <- quantile(estimates_FWLmodel7, 0.025)
+ci_uppercoefFWLbs <- quantile(estimates_FWLmodel7, 0.975)
+
+ci_lowerbsmen <- quantile(agesmax_FWLmodel7men, 0.025)
+ci_upperbsmen <- quantile(agesmax_FWLmodel7men, 0.975)
+
+ci_lowerbsfemales <- quantile(agesmax_FWLmodel7females, 0.025)
+ci_upperbsfemales <- quantile(agesmax_FWLmodel7females, 0.975)
+
+# Creating the male estimates table
+summary_table1bsmen <- data.frame(
+  Statistic = c("Bootstrap Mean", "Standard Error", 
+                "Lower 95% CI", "Upper 95% CI"),
+  Male_Value = c(meanpeakagebsmen, sepeakagebsmen, 
+                 ci_lowerbsmen, ci_upperbsmen)
+)
+
+# Creating the female estimates table
+summary_table1bsfemales <- data.frame(
+  Statistic = c("Bootstrap Mean", "Standard Error", 
+                "Lower 95% CI", "Upper 95% CI"),
+  Female_Value = c(meanpeakagebsfemales, sepeakagebsfemales, 
+                   ci_lowerbsfemales, ci_upperbsfemales)
+)
+
+# Merging the tables on the Statistic column
+merged_table2 <- merge(summary_table1bsmen,
+                      summary_table1bsfemales, by = "Statistic")
+
+# Printing table
+stargazer(merged_table2, summary = FALSE, type = "text",
+          title = "Bootstrap Peak Age Estimates by Sex", digits = 2)
+
+#Creating FWL Bootstrap 'female' coefficient estimation table:
+
+summary_tableBETA1s <- data.frame(
+  Statistic = c("Bootstrap + FWL Mean", "Standard Error", 
+                "Lower 95% CI", "Upper 95% CI", 'FWL-only value', 'OLS value'),
+  Beta1Coef_Value = c(meancoefFWLbs, secoefFWLbs, 
+                   ci_lowercoefFWLbs, ci_uppercoefFWLbs, 
+                   modelRESFWL$coefficients[2], model7$coefficients[2])
+)
+
+# Printing table
+stargazer(summary_tableBETA1s, summary = FALSE, type = "text",
+          title = "Bootstrap 
+          + FWL Coefficient Stats vs FWL and OLS Coefficients", digits = 4)
 
