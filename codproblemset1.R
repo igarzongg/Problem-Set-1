@@ -312,6 +312,9 @@ summary_table_HHeadF <- data.frame(
 )
 print(summary_table_HHeadF, row.names = FALSE)
 
+db$maxEducLevel[is.na(db$maxEducLevel)] <- 1 
+#Assigns no education if there are missing values in our Max Education Variable.
+
 freq_table_educ <- table(db$maxEducLevel)
 prop_table_educ <- prop.table(table(db$maxEducLevel))
 summary_table_educ <- data.frame(
@@ -456,7 +459,7 @@ plot3
 #Histogram of Hourly Salary grouped by sex
 
 plot4 <- ggplot(data = db) + 
-  geom_histogram(mapping = aes(x = y_ingLab_m, group = as.factor(female), 
+  geom_histogram(mapping = aes(x = y_ingLab_m_ha, group = as.factor(female), 
                                fill = as.factor(female)), bins = 30) + 
   scale_fill_manual(
     values = c("0" = "green", "1" = "purple"), 
@@ -837,6 +840,42 @@ stargazer(model7, type="text",
                              "Formal", "Size of Firm", "Max. Education Level"), 
           dep.var.labels = "Log Nominal Hourly Wage", 
           title = 'Conditional Wage Gap Model')
+
+
+#FWL ---------------------------------------------------------------------------
+
+db<-db %>% mutate(femaleResidX=lm(female~ age  + relab + Head_Female +
+                                    totalHoursWorked + formal + 
+                                    sizeFirm + maxEducLevel, db)$residuals) 
+#Residuals of regression female ~ X 
+
+db<-db %>% mutate(loghwageResidX=lm(y_ingLab_m_ha~ age  + relab + Head_Female +
+                                    totalHoursWorked + formal + 
+                                    sizeFirm + maxEducLevel, db)$residuals) 
+
+#Residuals of regression log nominal hourly wage ~ X 
+
+modelRESFWL <- lm(loghwageResidX~femaleResidX, db)
+stargazer(model7, modelRESFWL, type="text",digits=7,
+          covariate.labels=c("Female", "Age", "Employment Sector",
+          "Female Household Head", "Total Hours Worked", 
+          "Formal", "Size of Firm", "Max. Education Level", "FWL estimate"), 
+          dep.var.labels = c("Log Nominal Hourly Wage", "Residualized Model"), 
+          title = 'OLS vs FWL estimates')
+
+SSROLSmodel7 <-sum(resid(model7)^2)
+SSRFWLmodel7 <-sum(resid(modelRESFWL)^2) #Both models have the same SSR.
+
+##Adjusting the degrees of freedom by the 7 residualized predictors:
+
+df_OLSmodel7 = model7$df[1]
+df_FWLmodel7 = modelRESFWL$df[1]
+
+sqrt(diag(vcov(modelRESFWL))*(df_FWLmodel7/df_OLSmodel7))[2]
+
+sqrt(diag(vcov(model7)))[2] #Degrees of freedom have been succesfully adjusted.
+#Standard error now matches the one of the original regression.
+
 
 
 
