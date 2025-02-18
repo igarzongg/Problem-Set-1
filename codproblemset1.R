@@ -319,7 +319,6 @@ freq_table_educ <- table(db$maxEducLevel)
 prop_table_educ <- prop.table(table(db$maxEducLevel))
 summary_table_educ <- data.frame(
   Academic_achievement = c("1 (None)", 
-                           "2 (Tertiary Education or more)",
                            "3 (Primary incomplete)",
                            "4 (Primary complete)",
                            "5 (Secondary incomplete)",
@@ -407,7 +406,57 @@ summary_table <- data.frame(
 )
 print(summary_table)
 
-#TABLES -----------------------------------------------------------------------
+#OUTLIERS ----------------------------------------------------------------------
+
+
+##boxplot for Hours Worked
+
+boxplotynomh <- ggplot(data= db, 
+       mapping = aes(y=y_ingLab_m_ha, x="")) +
+  theme_bw() +
+  geom_boxplot()  +
+  ggtitle("")+
+  ylab("Total Hours Worked")+
+  xlab("")
+
+low_nomh <- mean(db$y_ingLab_m_ha) - 2* sd(db$y_ingLab_m_ha)
+up_nomh <- mean(db$y_ingLab_m_ha) + 2* sd(db$y_ingLab_m_ha)
+
+cut_nomh <- boxplotynomh + geom_hline(yintercept = 
+                              low_nomh,linetype="solid",color="red",size=0.7) +
+  geom_hline(yintercept = up_nomh,linetype="solid",color="red",size=0.7)
+
+#Maybe it's more convenient to winsorize by quantiles
+
+#Winsorizing
+
+treshold_nomh<- quantile(db$y_ingLab_m_ha, 0.975, na.rm=T)
+
+
+db<- db %>% mutate(y_ingLab_m_ha= 
+                     ifelse( test=( y_ingLab_m_ha>= treshold_nomh), 
+                                                yes= treshold_nomh,
+                                                no= y_ingLab_m_ha))
+boxwinsornomh <-ggplot(data= db, 
+          mapping = aes(y=y_ingLab_m_ha, x="")) +
+  theme_bw() +
+  geom_boxplot()  +
+  ggtitle("")+
+  ylab("Log Nominal Hourly Wage")+
+  xlab("")
+
+low_nomh <- mean(db$y_ingLab_m_ha) - 2* sd(db$y_ingLab_m_ha)
+up_nomh <- mean(db$y_ingLab_m_ha) + 2* sd(db$y_ingLab_m_ha)
+
+boxwinsornomh <- boxwinsornomh +
+  geom_hline(yintercept = low_nomh,linetype="solid",color="blue",size=0.7) +
+  geom_hline(yintercept = up_nomh,linetype="solid",color="blue",size=0.7)
+boxwinsornomh
+
+
+grid.arrange(boxwinsornomh, cut_nomh, ncol = 2)
+
+#DESC. STATS GRAPHS ------------------------------------------------------------
 
 #Hourly salary distribution by age grouped by employment type 
 #(Formal or Informal)
@@ -627,6 +676,18 @@ stargazer(model1, model2, type="text",
           title = 'Quadratic vs Linear model')
 
 db <- db  %>% mutate(yhat1=predict(model1), yhat2=predict(model2)) 
+
+summ <- db %>%  
+  group_by(
+    age, age2
+  ) %>%  
+  summarize(
+    mean_y = mean(y_ingLab_m_ha),
+    yhat_reg1 = mean(yhat1),
+    yhat_reg2 = mean(yhat2), .groups="drop"
+  ) 
+
+head(summ)
 
 # Compute standard errors for confidence intervals
 summ <- summ %>%
@@ -1000,8 +1061,11 @@ summ2 <- db %>%
     yhat_reg7females = mean(yhat2females), .groups="drop"
   ) #Predicted avg. hourly salary for this female
 
-head(summ2) #Data for males
-tail(summ2) #Data for females
+
+
+summ2_men <- summ2 %>% filter(!is.na(yhat_reg7men)) #Data for males
+summ2_females <- summ2 %>% filter(!is.na(yhat_reg7females)) #Data for females
+
 
 #GRAPHING
 
@@ -1193,4 +1257,40 @@ summary_tableBETA1s <- data.frame(
 stargazer(summary_tableBETA1s, summary = FALSE, type = "text",
           title = "Bootstrap 
           + FWL Coefficient Stats vs FWL and OLS Coefficients", digits = 4)
+
+# PREDICTING EARNINGS ----------------------------------------------------------
+
+set.seed(10101)
+
+#a). 
+
+inTrain <- createDataPartition(
+  y = db$y_ingLab_m_ha,  ## the outcome data are needed
+  p = .70, ## The percentage of training data
+  list = FALSE
+)
+
+training <- db %>% 
+  filter(row_number() %in% inTrain)
+
+testing  <- db %>% 
+  filter(!row_number() %in% inTrain)
+
+# Create data for visualization
+split_data <- data.frame(
+  Split = factor(c("Training", "Testing")),
+  Count = c(nrow(training), nrow(testing)),
+  Percentage = c(nrow(training)/nrow(db)*100, nrow(testing)/nrow(db)*100)
+)
+
+# Create the visualization
+ggplot(split_data, aes(x = Split, y = Count)) +
+  geom_bar(stat = "identity", fill = "darkblue", width = 0.5) +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%\n(n=", Count, ")")), 
+            vjust = -0.5, color = "black", size = 4) +
+  labs(title = "Train-Test Split Distribution",
+       y = "Number of Observations",
+       x = "") +
+  theme_bw() +
+  ylim(0, max(split_data$Count) * 1.2)  # Add some space for labels
 
