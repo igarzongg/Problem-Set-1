@@ -1145,17 +1145,18 @@ for(i in 1:B){
   
   #takes a sample with replacement of the same size of the original sample.
   
-  db<-db %>% mutate(femaleResidXbs=lm(female~ age + age2+ relab + Head_Female +
+  femaleResidXbs <- lm(female~ age + age2+ relab + Head_Female +
                                       totalHoursWorked + formal + 
                                       sizeFirm + maxEducLevel,
-                                      data = db_sample)$residuals) 
+                                      data = db_sample)$residuals
+
   #Residuals of regression female ~ X 
   
-  db<-db %>% mutate(loghwageResidXbs=lm(y_ingLab_m_ha~ age +
+  oghwageResidXbs <- lm(y_ingLab_m_ha~ age +
                                         age2 + relab + Head_Female +
                                         totalHoursWorked + formal + 
                                   sizeFirm + maxEducLevel, 
-                                  data =db_sample)$residuals) 
+                                  data = db_sample)$residuals
   
   #Residuals of regression log nominal hourly wage ~ X 
   
