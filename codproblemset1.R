@@ -1532,8 +1532,6 @@ dist_errors <- ggplot(d = data.frame(pred_errors), aes(x = pred_errors)) +
 
 dist_errors
 
-## outliers 
-
 
 ## LOOVC 
 
