@@ -1545,15 +1545,12 @@ model1_best_loovc <- train(reg_12,
                   method = 'lm', 
                   trControl= ctrl)
 
-head(model1_best_loovc)
+model1_best_loovc
 
 score_best1 <-RMSE(model1_best_loovc$pred$pred, db$y_ingLab_m_ha)
-
-scores_LOOCV<- append(scores_LOOCV, score_best1)
-
+score_best1
 
 ## Model 9 ---- second lowest predictive error 
-model1_best_loovc
 
 model2_best_loovc <- train(reg_9,
                            data = db,
@@ -1564,5 +1561,4 @@ model2_best_loovc <- train(reg_9,
 model2_best_loovc
 
 score_best2 <-RMSE(model2_best_loovc$pred$pred, db$y_ingLab_m_ha)
-
-scores_LOOCV<- append(scores_LOOCV, score_best2)
+score_best2
