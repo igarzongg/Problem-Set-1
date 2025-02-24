@@ -1562,3 +1562,13 @@ model2_best_loocv
 
 score_best2 <-RMSE(model2_best_loocv$pred$pred, db$y_ingLab_m_ha)
 score_best2
+
+## COMPARISON WITH VALIDATION SET APPROACH ----------------------------------------------------------------------------------------------
+
+comparison <- data.frame(
+  model = c("Model 12: Validation set approach", "Model 12: LOOCV", "Model 9: Validation set approach", "Model 9: LOOCV") ,
+  RMSE = c(score12,score_best1,score9,score_best2)
+)
+
+print(comparison)
+
