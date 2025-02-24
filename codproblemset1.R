@@ -1552,13 +1552,13 @@ score_best1
 
 ## Model 9 ---- second lowest predictive error 
 
-model2_best_loovc <- train(reg_9,
+model2_best_loocv <- train(reg_9,
                            data = db,
                            method = 'lm', 
                            trControl= ctrl)
 
 
-model2_best_loovc
+model2_best_loocv
 
-score_best2 <-RMSE(model2_best_loovc$pred$pred, db$y_ingLab_m_ha)
+score_best2 <-RMSE(model2_best_loocv$pred$pred, db$y_ingLab_m_ha)
 score_best2
