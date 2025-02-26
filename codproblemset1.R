@@ -1286,7 +1286,7 @@ split_data <- data.frame(
 
 # Create the visualization
 ggplot(split_data, aes(x = Split, y = Count)) +
-  geom_bar(stat = "identity", fill = "darkblue", width = 0.5) +
+  geom_bar(stat = "identity", fill = "lightblue", width = 0.5) +
   geom_text(aes(label = paste0(round(Percentage, 1), "%\n(n=", Count, ")")), 
             vjust = -0.5, color = "black", size = 4) +
   labs(title = "Train-Test Split Distribution",
@@ -1294,4 +1294,282 @@ ggplot(split_data, aes(x = Split, y = Count)) +
        x = "") +
   theme_bw() +
   ylim(0, max(split_data$Count) * 1.2)  # Add some space for labels
+
+# b) 
+
+# PREDICTIVE PERFORMANCE IN TERMS OF THE RMSE ----------------------------------
+# --------------- model 1 & model 2 results for Nominal Hourly Wage ------------
+# MODEL 1 ----------------------------------------------------------------------
+
+reg_1<- y_ingLab_m_ha ~ age + age2
+
+model1 <- lm(reg_1,
+               data = training)
+ 
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model1, testing)
+
+
+score1<- RMSE(predictions, testing$y_ingLab_m_ha )
+score1
+# 0.3489662
+
+# MODEL 2 ----------------------------------------------------------------------
+
+reg_2<- y_ingLab_m_ha ~ age
+
+model2 <- lm(reg_2,
+              data = training)
+
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model2, testing)
+
+
+score2<- RMSE(predictions, testing$y_ingLab_m_ha )
+score2
+# 0.3510614
+
+# ---------- model 3 & model 4 results for real Hourly Wage -----------------
+# MODEL 3 ----------------------------------------------------------------------
+
+reg_3<- y_salary_m_hu  ~ age + age2
+
+model3 <- lm(reg_3,
+              data = training)
+
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model3, testing)
+
+
+score3<- RMSE(predictions, testing$y_salary_m_hu )
+score3
+# 0.3241643
+
+# MODEL 4 ----------------------------------------------------------------------
+
+reg_4<- y_salary_m_hu  ~ age 
+
+model4 <- lm(reg_4,
+              data = training)
+
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model4, testing)
+
+
+score4<- RMSE(predictions, testing$y_salary_m_hu )
+score4
+# 0.3254666
+
+# MODEL 5 ----------------------------------------------------------------------
+
+reg_5<- y_ingLab_m_ha  ~ female
+
+model5 <- lm(reg_5,
+              data = training)
+
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model5, testing)
+
+
+score5<- RMSE(predictions, testing$y_ingLab_m_ha )
+score5
+# 0.3524142
+
+# MODEL 6 ----------------------------------------------------------------------
+
+reg_6 <- y_salary_m_hu  ~ female
+
+model6 <- lm(reg_6,
+              data = training)
+
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model6, testing)
+
+
+score6<- RMSE(predictions, testing$y_salary_m_hu )
+score6
+# 0.3263867 
+
+# MODEL 7 ----------------------------------------------------------------------
+
+reg_7 <- y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
+  totalHoursWorked + formal + sizeFirm + maxEducLevel
+
+model7 <- lm(reg_7,
+              data = training)
+
+# PERFORMANCE RMSE -------------------------------------------------------------
+predictions <- predict(model7, testing)
+
+
+score7<- RMSE(predictions, testing$y_ingLab_m_ha )
+score7
+# 0.2709422
+
+# MODELOS CON MAYOR COMPLEJIDAD/NO LINEALES ------------------------------------
+
+# MODELO 8 - polynomial regression (age^3) ---------------------------------------------
+
+reg_8 <- y_ingLab_m_ha ~ age + poly(age, 3) + female
+
+model8 <- lm(reg_8, 
+              data = training)
+
+# PERFORMANCE RMSE 
+
+predictions <- predict(model8, testing)
+
+score8 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score8
+# 0.3476926
+
+# MODELO 9 - polynomial regression on age, education and hours worked-----------
+# non-linearity in education and hours worked (posibles rendimientos marginales)
+
+reg_9 <- y_ingLab_m_ha ~ poly(age, 3) + poly(maxEducLevel, 2) + poly(totalHoursWorked, 2) + female + relab + formal + sizeFirm
+model9 <- lm(reg_9, 
+             data = training)
+
+# PERFORMANCE RMSE 
+
+predictions <- predict(model9, testing)
+
+score9 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score9
+# 0.2672922
+
+# MODELO 10 - interaction age & gender -----------------------------------------
+
+reg_10 <- y_ingLab_m_ha ~ age * female + age2 + relab + totalHoursWorked + maxEducLevel
+model10 <- lm(reg_10, 
+             data = training)
+
+# PERFORMANCE RMSE 
+
+predictions <- predict(model10, testing)
+
+score10 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score10
+# 0.312069
+
+# MODELO 11 - interaction formal work & gender -----------------------------------------
+
+reg_11 <- y_ingLab_m_ha ~ formal*female + age + age2 + relab + totalHoursWorked + maxEducLevel
+model11 <- lm(reg_11, 
+              data = training)
+
+# PERFORMANCE RMSE 
+
+predictions <- predict(model11, testing)
+
+score11 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score11
+# 0.2743492
+
+# MODELO 12 - multiple interactions --------------------------------------------
+
+reg_12 <- y_ingLab_m_ha ~ maxEducLevel * female + formal * sizeFirm + age * age2 + relab * totalHoursWorked
+model12 <- lm(reg_12, 
+              data = training)
+
+# PERFORMANCE RMSE 
+
+predictions <- predict(model12, testing)
+
+score12 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score12
+
+# 0.2624852
+
+# PERFORMANCE RESULT TABLE 
+
+results <- data.frame(
+  model = c("Model 1", "Model 2", "Model 3", 
+             "Model 4", "Model 5", "Model 6", 
+             "Model 7", "Model 8", "Model 9", "Model 10", "Model 11", "Model 12") ,
+  RMSE = c(score1, score2, score3, score4, score5, score6, score7, 
+           score8, score9, score10, score11, score12)
+)
+
+results <- results[order(results$RMSE), ]
+print(results)
+
+lowest <- results$model[1]
+lowest_RMSE <- results$RMSE[1]
+
+lowest # model 
+lowest_RMSE # lowest RMSE
+
+## Prediction errors in test sample --------------------------------------------
+
+model <- c("Model 1", "Model 2", "Model 3", 
+          "Model 4", "Model 5", "Model 6", 
+          "Model 7", "Model 8", "Model 9", "Model 10", "Model 11", "Model 12")
+
+# predictions 
+pred <- list(score1, score2, score3, score4, score5, score6, score7, 
+             score8, score9, score10, score11, score12)
+
+best_pred <- NULL 
+
+for (i in seq_along(model)) {
+  if (model[i] == lowest) {
+    best_pred <- pred[[i]]
+    break 
+  }
+}
+
+pred_errors <- testing$y_ingLab_m_ha - best_pred
+pred_errors
+
+# pred_errors graph -------------------------------------------------------------
+
+library(ggplot2)
+
+dist_errors <- ggplot(d = data.frame(pred_errors), aes(x = pred_errors)) + 
+  geom_histogram(binwidth = 0.1, fill = "lightgreen", color = "black") + 
+  labs(title = "Prediction errors distribution", x = "predicted errors") + 
+  theme_classic()
+
+dist_errors
+
+
+## LOOVC 
+
+ctrl <- trainControl(
+  method = "LOOCV")
+
+## Model 12 ---- first lowest predictive error 
+
+model1_best_loovc <- train(reg_12,
+                  data = db,
+                  method = 'lm', 
+                  trControl= ctrl)
+
+model1_best_loovc
+
+score_best1 <-RMSE(model1_best_loovc$pred$pred, db$y_ingLab_m_ha)
+score_best1
+
+## Model 9 ---- second lowest predictive error 
+
+model2_best_loocv <- train(reg_9,
+                           data = db,
+                           method = 'lm', 
+                           trControl= ctrl)
+
+
+model2_best_loocv
+
+score_best2 <-RMSE(model2_best_loocv$pred$pred, db$y_ingLab_m_ha)
+score_best2
+
+## COMPARISON WITH VALIDATION SET APPROACH ----------------------------------------------------------------------------------------------
+
+comparison <- data.frame(
+  model = c("Model 12: Validation set approach", "Model 12: LOOCV", "Model 9: Validation set approach", "Model 9: LOOCV") ,
+  RMSE = c(score12,score_best1,score9,score_best2)
+)
+
+print(comparison)
 
