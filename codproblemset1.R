@@ -1307,10 +1307,10 @@ model1 <- lm(reg_1,
                data = training)
  
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model1, testing)
+prediction_model1 <- predict(model1, testing)
 
 
-score1<- RMSE(predictions, testing$y_ingLab_m_ha )
+score1<- RMSE(prediction_model1, testing$y_ingLab_m_ha )
 score1
 # 0.3489662
 
@@ -1322,10 +1322,10 @@ model2 <- lm(reg_2,
               data = training)
 
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model2, testing)
+prediction_model2 <- predict(model2, testing)
 
 
-score2<- RMSE(predictions, testing$y_ingLab_m_ha )
+score2<- RMSE(prediction_model2, testing$y_ingLab_m_ha )
 score2
 # 0.3510614
 
@@ -1338,10 +1338,10 @@ model3 <- lm(reg_3,
               data = training)
 
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model3, testing)
+prediction_model3 <- predict(model3, testing)
 
 
-score3<- RMSE(predictions, testing$y_salary_m_hu )
+score3<- RMSE(prediction_model3, testing$y_salary_m_hu )
 score3
 # 0.3241643
 
@@ -1353,10 +1353,10 @@ model4 <- lm(reg_4,
               data = training)
 
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model4, testing)
+prediction_model4 <- predict(model4, testing)
 
 
-score4<- RMSE(predictions, testing$y_salary_m_hu )
+score4<- RMSE(prediction_model4, testing$y_salary_m_hu )
 score4
 # 0.3254666
 
@@ -1368,10 +1368,10 @@ model5 <- lm(reg_5,
               data = training)
 
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model5, testing)
+prediction_model5 <- predict(model5, testing)
 
 
-score5<- RMSE(predictions, testing$y_ingLab_m_ha )
+score5<- RMSE(prediction_model5, testing$y_ingLab_m_ha )
 score5
 # 0.3524142
 
@@ -1383,10 +1383,10 @@ model6 <- lm(reg_6,
               data = training)
 
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model6, testing)
+prediction_model6 <- predict(model6, testing)
 
 
-score6<- RMSE(predictions, testing$y_salary_m_hu )
+score6<- RMSE(prediction_model6, testing$y_salary_m_hu )
 score6
 # 0.3263867 
 
@@ -1399,16 +1399,16 @@ model7 <- lm(reg_7,
               data = training)
 
 # PERFORMANCE RMSE -------------------------------------------------------------
-predictions <- predict(model7, testing)
+prediction_model7 <- predict(model7, testing)
 
 
-score7<- RMSE(predictions, testing$y_ingLab_m_ha )
+score7<- RMSE(prediction_model7, testing$y_ingLab_m_ha )
 score7
 # 0.2709422
 
 # MODELOS CON MAYOR COMPLEJIDAD/NO LINEALES ------------------------------------
 
-# MODELO 8 - polynomial regression (age^3) ---------------------------------------------
+# MODELO 8 - polynomial regression (age^3) -------------------------------------
 
 reg_8 <- y_ingLab_m_ha ~ age + poly(age, 3) + female
 
@@ -1417,66 +1417,71 @@ model8 <- lm(reg_8,
 
 # PERFORMANCE RMSE 
 
-predictions <- predict(model8, testing)
+prediction_model8 <- predict(model8, testing)
 
-score8 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score8 <- RMSE(prediction_model8, testing$y_ingLab_m_ha)
 score8
 # 0.3476926
 
 # MODELO 9 - polynomial regression on age, education and hours worked-----------
 # non-linearity in education and hours worked (posibles rendimientos marginales)
 
-reg_9 <- y_ingLab_m_ha ~ poly(age, 3) + poly(maxEducLevel, 2) + poly(totalHoursWorked, 2) + female + relab + formal + sizeFirm
+reg_9 <- y_ingLab_m_ha ~ poly(age, 3) + poly(maxEducLevel, 2) +
+  poly(totalHoursWorked, 2) + female + relab + formal + sizeFirm
 model9 <- lm(reg_9, 
              data = training)
 
 # PERFORMANCE RMSE 
 
-predictions <- predict(model9, testing)
+predictions_model9 <- predict(model9, testing)
 
-score9 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score9 <- RMSE(predictions_model9, testing$y_ingLab_m_ha)
 score9
 # 0.2672922
 
 # MODELO 10 - interaction age & gender -----------------------------------------
 
-reg_10 <- y_ingLab_m_ha ~ age * female + age2 + relab + totalHoursWorked + maxEducLevel
+reg_10 <- y_ingLab_m_ha ~ age * female + age2 + relab + totalHoursWorked + 
+  maxEducLevel
 model10 <- lm(reg_10, 
              data = training)
 
 # PERFORMANCE RMSE 
 
-predictions <- predict(model10, testing)
+prediction_model10 <- predict(model10, testing)
 
-score10 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score10 <- RMSE(prediction_model10, testing$y_ingLab_m_ha)
 score10
 # 0.312069
 
-# MODELO 11 - interaction formal work & gender -----------------------------------------
+# MODELO 11 - interaction formal work & gender ---------------------------------
 
-reg_11 <- y_ingLab_m_ha ~ formal*female + age + age2 + relab + totalHoursWorked + maxEducLevel
+reg_11 <- y_ingLab_m_ha ~
+  formal*female + age + age2 + relab + totalHoursWorked + maxEducLevel
 model11 <- lm(reg_11, 
               data = training)
 
 # PERFORMANCE RMSE 
 
-predictions <- predict(model11, testing)
+prediction_model11 <- predict(model11, testing)
 
-score11 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score11 <- RMSE(prediction_model11, testing$y_ingLab_m_ha)
 score11
 # 0.2743492
 
 # MODELO 12 - multiple interactions --------------------------------------------
 
-reg_12 <- y_ingLab_m_ha ~ maxEducLevel * female + formal * sizeFirm + age * age2 + relab * totalHoursWorked
+reg_12 <- y_ingLab_m_ha ~ 
+  maxEducLevel * female + formal * sizeFirm + age * age2 + 
+  relab * totalHoursWorked
 model12 <- lm(reg_12, 
               data = training)
 
 # PERFORMANCE RMSE 
 
-predictions <- predict(model12, testing)
+prediction_model12 <- predict(model12, testing)
 
-score12 <- RMSE(predictions, testing$y_ingLab_m_ha)
+score12 <- RMSE(prediction_model12, testing$y_ingLab_m_ha)
 score12
 
 # 0.2624852
@@ -1486,7 +1491,8 @@ score12
 results <- data.frame(
   model = c("Model 1", "Model 2", "Model 3", 
              "Model 4", "Model 5", "Model 6", 
-             "Model 7", "Model 8", "Model 9", "Model 10", "Model 11", "Model 12") ,
+             "Model 7", "Model 8", "Model 9", "Model 10", "Model 11",
+            "Model 12") ,
   RMSE = c(score1, score2, score3, score4, score5, score6, score7, 
            score8, score9, score10, score11, score12)
 )
@@ -1506,32 +1512,55 @@ model <- c("Model 1", "Model 2", "Model 3",
           "Model 4", "Model 5", "Model 6", 
           "Model 7", "Model 8", "Model 9", "Model 10", "Model 11", "Model 12")
 
-# predictions 
-pred <- list(score1, score2, score3, score4, score5, score6, score7, 
-             score8, score9, score10, score11, score12)
+best_model_name <- results$model[1]
+best_model_rmse <- results$RMSE[1]
 
-best_pred <- NULL 
+print(paste("Best Model:", best_model_name, "with RMSE:", best_model_rmse))
 
-for (i in seq_along(model)) {
-  if (model[i] == lowest) {
-    best_pred <- pred[[i]]
-    break 
-  }
+# Step 2: Retrieve predictions and compute residuals for the best model
+if (best_model_name == "Model 1") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model1
+} else if (best_model_name == "Model 2") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model2
+} else if (best_model_name == "Model 3") {
+  residuals_best <- testing$y_salary_m_hu - prediction_model3
+} else if (best_model_name == "Model 4") {
+  residuals_best <- testing$y_salary_m_hu - prediction_model4
+} else if (best_model_name == "Model 5") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model5
+} else if (best_model_name == "Model 6") {
+  residuals_best <- testing$y_salary_m_hu - prediction_model6
+} else if (best_model_name == "Model 7") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model7
+} else if (best_model_name == "Model 8") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model8
+} else if (best_model_name == "Model 9") {
+  residuals_best <- testing$y_ingLab_m_ha - predictions_model9
+} else if (best_model_name == "Model 10") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model10
+} else if (best_model_name == "Model 11") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model11
+} else if (best_model_name == "Model 12") {
+  residuals_best <- testing$y_ingLab_m_ha - prediction_model12
 }
 
-pred_errors <- testing$y_ingLab_m_ha - best_pred
-pred_errors
+# Step 3: Analyze residuals
+summary(residuals_best)
 
-# pred_errors graph -------------------------------------------------------------
+# Step 4: Plot residuals distribution
+ggplot(data.frame(residuals_best), aes(x = residuals_best)) +
+  geom_histogram(bins = 30, fill = "steelblue", alpha = 0.7) +
+  ggtitle(paste("Residuals Distribution -", best_model_name)) +
+  xlab("Residuals") + ylab("Frequency")
 
-library(ggplot2)
+# Step 5: Identify extreme residuals (outliers)
+threshold <- mean(residuals_best) + 2 * sd(residuals_best)
+outliers <- residuals_best[abs(residuals_best) > threshold]
 
-dist_errors <- ggplot(d = data.frame(pred_errors), aes(x = pred_errors)) + 
-  geom_histogram(binwidth = 0.1, fill = "lightgreen", color = "black") + 
-  labs(title = "Prediction errors distribution", x = "predicted errors") + 
-  theme_classic()
+print(paste("Number of potential outliers:", length(outliers)))
+print("Outliers:")
+print(outliers)
 
-dist_errors
 
 
 ## LOOVC 
@@ -1564,10 +1593,11 @@ model2_best_loocv
 score_best2 <-RMSE(model2_best_loocv$pred$pred, db$y_ingLab_m_ha)
 score_best2
 
-## COMPARISON WITH VALIDATION SET APPROACH ----------------------------------------------------------------------------------------------
+## COMPARISON WITH VALIDATION SET APPROACH -------------------------------------
 
 comparison <- data.frame(
-  model = c("Model 12: Validation set approach", "Model 12: LOOCV", "Model 9: Validation set approach", "Model 9: LOOCV") ,
+  model = c("Model 12: Validation set approach", "Model 12: LOOCV", "Model 9:
+            Validation set approach", "Model 9: LOOCV") ,
   RMSE = c(score12,score_best1,score9,score_best2)
 )
 
