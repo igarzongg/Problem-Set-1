@@ -1,0 +1,11 @@
+
+Comparison of Nomina
+================================================
+        Statistic       Nominal_Value Real_Value
+------------------------------------------------
+1    Bootstrap Mean         36.74       36.95   
+2    Standard Error         0.72         0.83   
+3     Lower 95% CI          35.16       35.18   
+4     Upper 95% CI          38.01       38.51   
+5 Original OLS Peak Age     36.80       36.80   
+------------------------------------------------
