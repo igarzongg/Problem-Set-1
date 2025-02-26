@@ -1450,7 +1450,7 @@ score9
 
 # MODELO 10 - interaction age & gender -----------------------------------------
 
-reg_10 <- y_ingLab_m_ha ~ age * female + age2 + relab + totalHoursWorked + 
+reg_10 <- y_ingLab_m_ha ~ age+ age * female + age2 + relab + totalHoursWorked + 
   maxEducLevel
 model10 <- lm(reg_10, 
              data = training)
@@ -1466,7 +1466,8 @@ score10
 # MODELO 11 - interaction formal work & gender ---------------------------------
 
 reg_11 <- y_ingLab_m_ha ~
-  formal*female + age + age2 + relab + totalHoursWorked + maxEducLevel
+  female+
+  formal*female + age + age2 + relab + totalHoursWorked + maxEducLevel + formal
 model11 <- lm(reg_11, 
               data = training)
 
@@ -1717,7 +1718,7 @@ for (i in 1:N) {
 
 looCV_error9 <- mean(LOO)
 score_best2_lev <- sqrt(looCV_error9) ##Yields the same result as LOOCV
-
+score_best2_lev
 
 
 
