@@ -2,30 +2,25 @@
 
 db <- db %>% mutate(age2= age^2)
 
-model1 <- lm(log_nominal_income  ~ age + age2, data= db)
+model2 <- lm(log_nominal_income  ~ age + age2, data= db)
 
-model2 <- lm(log_nominal_income  ~ age, data= db)
+model3 <- lm(log_nominal_income  ~ age, data= db)
 
-model3 <- lm(log_real_income  ~ age + age2, data= db)
+model2r <- lm(log_real_income  ~ age + age2, data= db)
 
-model4 <- lm(log_real_income  ~ age, data= db)
+model3r <- lm(log_real_income  ~ age, data= db)
 
-stargazer(model1, model2, type="text", covariate.labels=c("Age","Agesq"))
+stargazer(model2, model3, type="text", covariate.labels=c("Age","Agesq"))
 #Model results for Nominal Hourly Wage
 
-stargazer(model3, model4, type="text", covariate.labels=c("Age","Agesq"))
+stargazer(model2r, model3r, type="text", covariate.labels=c("Age","Agesq"))
 #Model results for Real Hourly Wage
 
-residualsmodel1 <- residuals(model1)
 residualsmodel2 <- residuals(model2)
-
 residualsmodel3 <- residuals(model3)
-residualsmodel4 <- residuals(model4)
 
-ggplot(data= db, 
-       mapping = aes(x=residualsmodel1)) +
-  theme_bw() + 
-  geom_density() 
+residualsmodel2r <- residuals(model2r)
+residualsmodel3r <- residuals(model3r)
 
 ggplot(data= db, 
        mapping = aes(x=residualsmodel2)) +
@@ -38,16 +33,14 @@ ggplot(data= db,
   geom_density() 
 
 ggplot(data= db, 
-       mapping = aes(x=residualsmodel4)) +
+       mapping = aes(x=residualsmodel2r)) +
   theme_bw() + 
   geom_density() 
 
-ggplot(db , aes(y = residualsmodel1 , x = orden )) +
-  geom_point() + # add points
-  theme_bw() + #black and white theme
-  labs(x = "Observations",  
-       y = "Residuals",
-       title = "") # labels
+ggplot(data= db, 
+       mapping = aes(x=residualsmodel3r)) +
+  theme_bw() + 
+  geom_density() 
 
 ggplot(db , aes(y = residualsmodel2 , x = orden )) +
   geom_point() + # add points
@@ -63,7 +56,14 @@ ggplot(db , aes(y = residualsmodel3 , x = orden )) +
        y = "Residuals",
        title = "") # labels
 
-ggplot(db , aes(y = residualsmodel4 , x = orden )) +
+ggplot(db , aes(y = residualsmodel2r , x = orden )) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+ggplot(db , aes(y = residualsmodel3r , x = orden )) +
   geom_point() + # add points
   theme_bw() + #black and white theme
   labs(x = "Observations",  
@@ -71,19 +71,12 @@ ggplot(db , aes(y = residualsmodel4 , x = orden )) +
        title = "") # labels
 
 
-db<-db %>% mutate(m1_std_residuals= studres(model1) )
 db<-db %>% mutate(m2_std_residuals= studres(model2) )
-
 db<-db %>% mutate(m3_std_residuals= studres(model3) )
-db<-db %>% mutate(m4_std_residuals= studres(model4) )
 
+db<-db %>% mutate(m2r_std_residuals= studres(model2r) )
+db<-db %>% mutate(m3r_std_residuals= studres(model3r) )
 
-ggplot(db , aes(y = m1_std_residuals , x = orden)) +
-  geom_point() + # add points
-  theme_bw() + #black and white theme
-  labs(x = "Observations",  
-       y = "Residuals",
-       title = "") # labels
 
 ggplot(db , aes(y = m2_std_residuals , x = orden)) +
   geom_point() + # add points
@@ -99,7 +92,14 @@ ggplot(db , aes(y = m3_std_residuals , x = orden)) +
        y = "Residuals",
        title = "") # labels
 
-ggplot(db , aes(y = m4_std_residuals , x = orden)) +
+ggplot(db , aes(y = m2r_std_residuals , x = orden)) +
+  geom_point() + # add points
+  theme_bw() + #black and white theme
+  labs(x = "Observations",  
+       y = "Residuals",
+       title = "") # labels
+
+ggplot(db , aes(y = m3r_std_residuals , x = orden)) +
   geom_point() + # add points
   theme_bw() + #black and white theme
   labs(x = "Observations",  
@@ -107,18 +107,18 @@ ggplot(db , aes(y = m4_std_residuals , x = orden)) +
        title = "") # labels
 
 db <- db %>% 
-  filter(m1_std_residuals < 2 & m1_std_residuals > -2 & 
-           m2_std_residuals < 2 & m2_std_residuals > -2 & m3_std_residuals 
-         < 2 & m3_std_residuals > -2 & 
-           m4_std_residuals < 2 & m4_std_residuals > -2)
+  filter(m2_std_residuals < 2 & m2_std_residuals > -2 & 
+           m3_std_residuals < 2 & m3_std_residuals > -2 & m2r_std_residuals 
+         < 2 & m2r_std_residuals > -2 & 
+           m3r_std_residuals < 2 & m3r_std_residuals > -2)
 
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
 
-model1 <- lm(log_nominal_income  ~ age + age2, data= db)
+model2 <- lm(log_nominal_income  ~ age + age2, data= db)
 
 # Extract coefficients
-beta1 <- coef(model1)["age"]
-beta2 <- coef(model1)["age2"]
+beta1 <- coef(model2)["age"]
+beta2 <- coef(model2)["age2"]
 
 # Compute the age at which income is maximized
 age_max <- -beta1 / (2 * beta2)
@@ -133,7 +133,7 @@ stargazer(model1, model2, type="text",
           title = 'Quadratic (1) vs Linear (2) model', 
           out = "regression_tablepunto32.doc")
 
-db <- db  %>% mutate(yhat1=predict(model1), yhat2=predict(model2)) 
+db <- db  %>% mutate(yhat2=predict(model2), yhat3=predict(model3)) 
 
 summ <- db %>%  
   group_by(
@@ -141,8 +141,8 @@ summ <- db %>%
   ) %>%  
   summarize(
     mean_y = mean(log_nominal_income),
-    yhat_reg1 = mean(yhat1),
-    yhat_reg2 = mean(yhat2), .groups="drop"
+    yhat_reg2 = mean(yhat2),
+    yhat_reg3 = mean(yhat3), .groups="drop"
   ) 
 
 head(summ)
@@ -150,13 +150,13 @@ head(summ)
 # Compute standard errors for confidence intervals
 summ <- summ %>%
   mutate(
-    se_yhat1 = sd(yhat_reg1, na.rm = TRUE) / sqrt(n()),
-    lower_yhat1 = yhat_reg1 - 1.96 * se_yhat1,
-    upper_yhat1 = yhat_reg1 + 1.96 * se_yhat1,
-    
     se_yhat2 = sd(yhat_reg2, na.rm = TRUE) / sqrt(n()),
     lower_yhat2 = yhat_reg2 - 1.96 * se_yhat2,
-    upper_yhat2 = yhat_reg2 + 1.96 * se_yhat2
+    upper_yhat2 = yhat_reg2 + 1.96 * se_yhat2,
+    
+    se_yhat3 = sd(yhat_reg3, na.rm = TRUE) / sqrt(n()),
+    lower_yhat3 = yhat_reg3 - 1.96 * se_yhat3,
+    upper_yhat3 = yhat_reg3 + 1.96 * se_yhat3
   )
 
 # Graphing with confidence intervals and proper formatting
@@ -171,28 +171,28 @@ ggplot() +
   # Confidence interval for Model 1
   geom_ribbon(
     data = summ, 
-    aes(x = age, ymin = lower_yhat1, ymax = upper_yhat1, fill = "Model 1"),
+    aes(x = age, ymin = lower_yhat2, ymax = upper_yhat2, fill = "Model 2"),
     alpha = 0.2
   ) +
   
   # Line for Model 1
   geom_line(
     data = summ, 
-    aes(x = age, y = yhat_reg1, color = "Model 1"),
+    aes(x = age, y = yhat_reg2, color = "Model 2"),
     linewidth = 1.5
   ) + 
   
   # Confidence interval for Model 2
   geom_ribbon(
     data = summ, 
-    aes(x = age, ymin = lower_yhat2, ymax = upper_yhat2, fill = "Model 2"),
+    aes(x = age, ymin = lower_yhat3, ymax = upper_yhat3, fill = "Model 3"),
     alpha = 0.2
   ) +
   
   # Line for Model 2
   geom_line(
     data = summ, 
-    aes(x = age, y = yhat_reg2, color = "Model 2"),
+    aes(x = age, y = yhat_reg3, color = "Model 3"),
     linewidth = 1.5
   ) +
   
