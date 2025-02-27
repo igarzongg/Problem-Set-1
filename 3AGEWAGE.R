@@ -153,11 +153,6 @@ age_max #Income is maximized at this age
 
 model2 <- lm(log_nominal_income  ~ age, data= db)
 
-stargazer(model2, model3, type="text",
-          covariate.labels=c("Age","Squared Age"), 
-          dep.var.labels = "Log Nominal Hourly Wage", 
-          title = 'Linear (2) vs Quadratic (3) model', 
-          out = "regression_tablepunto32.doc")
 
 db <- db  %>% mutate(yhat2=predict(model2), yhat3=predict(model3)) 
 
@@ -244,7 +239,8 @@ ggplot() +
   )
 
 
-## Finding the 'peak-age' with CI's according by bootstrapping the the model
+## Finding the 'peak-age' with CI's according by bootstrapping the the model---
+
 
 set.seed(101110)
 
@@ -266,6 +262,8 @@ for(i in 1:B){
   
   estimates_model3[i]<- age_maxb #saves it in the above vector
 }
+
+
 
 length(estimates_model3)
 
@@ -385,7 +383,7 @@ ggplot() +
   )
 
 
-## Finding the 'peak-age' with CI's according by bootstrapping the the model
+## Finding the 'peak-age' with CI's according by bootstrapping the the model----
 
 set.seed(101111)
 
@@ -416,8 +414,10 @@ meanpeakager <- mean(estimates_model5)
 
 sepeakager <- sqrt(var(estimates_model5))
 
+
 ci_lowerr <- quantile(estimates_model5, 0.025)
 ci_upperr <- quantile(estimates_model5, 0.975)
+
 
 ## Creating the summary table(s) with the relevant estimate statistics
 
