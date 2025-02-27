@@ -135,7 +135,7 @@ stargazer(model2, model3, model4, model5,
           notes = "This table presents the estimation results for nominal and real income models, considering age and its quadratic term. Standard errors are in parentheses.",
           notes.align = "l",
           type = "text",
-          out = "regtable31.doc")
+          out = "regtable31.htm")
 
 
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
@@ -229,7 +229,7 @@ ggplot() +
     x = "Age",
     y = "Log Nominal Hourly Wages",
     color = "Model",
-    fill = "Confidence Interval",
+    fill = "Conf. Interval",
     caption = "Note: The dots represent observed mean wages,
     while the lines indicate predicted wages from two models.\nShaded areas 
     represent 95% confidence intervals."

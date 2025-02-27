@@ -1,11 +1,11 @@
 
-Comparison of Nomina
+Comparison of Nominal and Real Bootstrap Estimates of Peak Age
 ================================================
         Statistic       Nominal_Value Real_Value
 ------------------------------------------------
-1    Bootstrap Mean         36.74       36.95   
-2    Standard Error         0.72         0.83   
-3     Lower 95% CI          35.16       35.18   
-4     Upper 95% CI          38.01       38.51   
-5 Original OLS Peak Age     36.80       36.80   
+1    Bootstrap Mean         36.39       36.35   
+2    Standard Error         0.77         0.99   
+3     Lower 95% CI          34.80       34.29   
+4     Upper 95% CI          37.73       38.13   
+5 Original OLS Peak Age     36.44       36.44   
 ------------------------------------------------
