@@ -89,7 +89,7 @@ plot0
 
 summary(db$log_real_income)
 
-plot00 <- ggplot(db, aes(x = log_real_income )) +
+plot00 <- ggplot(db, aes(x = y_salary_m_hu )) +
   geom_histogram(bins = 50, fill = "darkblue") +
   labs(x = "Total Hourly Real Income", y = "N. Obs") +
   theme_bw() 
@@ -455,17 +455,17 @@ library(knitr)
 
 # Add a 'Variable' column to identify each categorical variable
 summary_table_female <- summary_table_female %>% 
-  mutate(Variable = "Female")
+  mutate(Variable = "Sex")
 summary_table_HHeadF <- summary_table_HHeadF %>% 
-  mutate(Variable = "Head_Female")
+  mutate(Variable = "Female Household Head?")
 summary_table_educ <- summary_table_educ %>% 
-  mutate(Variable = "maxEducLevel")
+  mutate(Variable = "Max. Education Level")
 summary_table_form <- summary_table_form %>%
-  mutate(Variable = "formal")
+  mutate(Variable = "Formal worker?")
 summary_table_sfirm <- summary_table_sfirm %>% 
-  mutate(Variable = "sizeFirm")
+  mutate(Variable = "Size of Firm")
 summary_table_Employment_Sector <- summary_table_Employment_Sector %>% 
-  mutate(Variable = "Employment_Sector")
+  mutate(Variable = "Employment Sector")
 
 # Check column names before renaming
 print(colnames(summary_table_female))
