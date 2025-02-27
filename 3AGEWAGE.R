@@ -2,25 +2,25 @@
 
 db <- db %>% mutate(age2= age^2)
 
-model2 <- lm(log_nominal_income  ~ age + age2, data= db)
+model2 <- lm(log_nominal_income  ~ age  data= db)
 
-model3 <- lm(log_nominal_income  ~ age, data= db)
+model3 <- lm(log_nominal_income  ~ age + age2, data= db)
 
-model2r <- lm(log_real_income  ~ age + age2, data= db)
+model4 <- lm(log_real_income  ~ age,  data= db)
 
-model3r <- lm(log_real_income  ~ age, data= db)
+model5 <- lm(log_real_income  ~ age + age2 data= db)
 
 stargazer(model2, model3, type="text", covariate.labels=c("Age","Agesq"))
 #Model results for Nominal Hourly Wage
 
-stargazer(model2r, model3r, type="text", covariate.labels=c("Age","Agesq"))
+stargazer(model4, model5, type="text", covariate.labels=c("Age","Agesq"))
 #Model results for Real Hourly Wage
 
 residualsmodel2 <- residuals(model2)
 residualsmodel3 <- residuals(model3)
 
-residualsmodel2r <- residuals(model2r)
-residualsmodel3r <- residuals(model3r)
+residualsmodel4 <- residuals(model4)
+residualsmodel5 <- residuals(model5)
 
 ggplot(data= db, 
        mapping = aes(x=residualsmodel2)) +
@@ -33,12 +33,12 @@ ggplot(data= db,
   geom_density() 
 
 ggplot(data= db, 
-       mapping = aes(x=residualsmodel2r)) +
+       mapping = aes(x=residualsmodel4)) +
   theme_bw() + 
   geom_density() 
 
 ggplot(data= db, 
-       mapping = aes(x=residualsmodel3r)) +
+       mapping = aes(x=residualsmodel5)) +
   theme_bw() + 
   geom_density() 
 
@@ -56,14 +56,14 @@ ggplot(db , aes(y = residualsmodel3 , x = orden )) +
        y = "Residuals",
        title = "") # labels
 
-ggplot(db , aes(y = residualsmodel2r , x = orden )) +
+ggplot(db , aes(y = residualsmodel4 , x = orden )) +
   geom_point() + # add points
   theme_bw() + #black and white theme
   labs(x = "Observations",  
        y = "Residuals",
        title = "") # labels
 
-ggplot(db , aes(y = residualsmodel3r , x = orden )) +
+ggplot(db , aes(y = residualsmodel5 , x = orden )) +
   geom_point() + # add points
   theme_bw() + #black and white theme
   labs(x = "Observations",  
@@ -74,8 +74,8 @@ ggplot(db , aes(y = residualsmodel3r , x = orden )) +
 db<-db %>% mutate(m2_std_residuals= studres(model2) )
 db<-db %>% mutate(m3_std_residuals= studres(model3) )
 
-db<-db %>% mutate(m2r_std_residuals= studres(model2r) )
-db<-db %>% mutate(m3r_std_residuals= studres(model3r) )
+db<-db %>% mutate(m2r_std_residuals= studres(model4) )
+db<-db %>% mutate(m3r_std_residuals= studres(model5) )
 
 
 ggplot(db , aes(y = m2_std_residuals , x = orden)) +
@@ -114,11 +114,11 @@ db <- db %>%
 
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
 
-model2 <- lm(log_nominal_income  ~ age + age2, data= db)
+model3 <- lm(log_nominal_income  ~ age + age2, data= db)
 
 # Extract coefficients
-beta1 <- coef(model2)["age"]
-beta2 <- coef(model2)["age2"]
+beta1 <- coef(model3)["age"]
+beta2 <- coef(model3)["age2"]
 
 # Compute the age at which income is maximized
 age_max <- -beta1 / (2 * beta2)
@@ -127,10 +127,10 @@ age_max #Income is maximized at this age
 
 model2 <- lm(log_nominal_income  ~ age, data= db)
 
-stargazer(model1, model2, type="text",
+stargazer(model2, model3, type="text",
           covariate.labels=c("Age","Squared Age"), 
           dep.var.labels = "Log Nominal Hourly Wage", 
-          title = 'Quadratic (1) vs Linear (2) model', 
+          title = 'Linear (2) vs Quadratic (3) model', 
           out = "regression_tablepunto32.doc")
 
 db <- db  %>% mutate(yhat2=predict(model2), yhat3=predict(model3)) 
@@ -168,28 +168,28 @@ ggplot() +
     color = "blue", size = 2, alpha = 0.5
   ) + 
   
-  # Confidence interval for Model 1
+  # Confidence interval for Model 2
   geom_ribbon(
     data = summ, 
     aes(x = age, ymin = lower_yhat2, ymax = upper_yhat2, fill = "Model 2"),
     alpha = 0.2
   ) +
   
-  # Line for Model 1
+  # Line for Model 2
   geom_line(
     data = summ, 
     aes(x = age, y = yhat_reg2, color = "Model 2"),
     linewidth = 1.5
   ) + 
   
-  # Confidence interval for Model 2
+  # Confidence interval for Model 3
   geom_ribbon(
     data = summ, 
     aes(x = age, ymin = lower_yhat3, ymax = upper_yhat3, fill = "Model 3"),
     alpha = 0.2
   ) +
   
-  # Line for Model 2
+  # Line for Model 3
   geom_line(
     data = summ, 
     aes(x = age, y = yhat_reg3, color = "Model 3"),
@@ -224,41 +224,41 @@ set.seed(101110)
 
 B <- 1000
 
-estimates_model1<-rep(NA,B)
+estimates_model3<-rep(NA,B)
 
 for(i in 1:B){
   
   db_sample<- sample_frac(db,size=1,replace=TRUE) 
   #takes a sample with replacement of the same size of the original sample 
   
-  model1 <- lm(log_nominal_income  ~ age + age2, db_sample)
+  model3 <- lm(log_nominal_income  ~ age + age2, db_sample)
   
-  beta1<-model1$coefficients[2] # gets the coefficient of interest 
-  beta2 <- model1$coefficients[3]
+  beta1<-model3$coefficients[2] # gets the coefficient of interest 
+  beta2 <- model3$coefficients[3]
   
   age_maxb <- -beta1 / (2 * beta2)
   
-  estimates_model1[i]<- age_maxb #saves it in the above vector
+  estimates_model3[i]<- age_maxb #saves it in the above vector
 }
 
-length(estimates_model1)
+length(estimates_model3)
 
-plot(hist(estimates_model1))
+plot(hist(estimates_model3))
 
-meanpeakage <- mean(estimates_model1)
+meanpeakage <- mean(estimates_model3)
 
-sepeakage <- sqrt(var(estimates_model1))
+sepeakage <- sqrt(var(estimates_model3))
 
-ci_lower <- quantile(estimates_model1, 0.025)
-ci_upper <- quantile(estimates_model1, 0.975)
+ci_lower <- quantile(estimates_model3, 0.025)
+ci_upper <- quantile(estimates_model3, 0.975)
 
 ## Estimation procedure for REAL Hourly Wage -----------------------------------
 
-model3 <- lm(log_real_income  ~ age + age2, data= db)
+model5 <- lm(log_real_income  ~ age + age2, data= db)
 
 # Extract coefficients
-beta1r <- coef(model3)["age"]
-beta2r <- coef(model3)["age2"]
+beta1r <- coef(model5)["age"]
+beta2r <- coef(model5)["age2"]
 
 # Compute the age at which income is maximized
 age_maxr <- -beta1r / (2 * beta2r)
@@ -267,12 +267,12 @@ age_maxr #Income is maximized at this age
 
 model4 <- lm(log_real_income  ~ age, data= db)
 
-stargazer(model3, model4, type="text",
+stargazer(model5, model4, type="text",
           covariate.labels=c("Age","Squared Age"), 
           dep.var.labels = "Log Real Hourly Wage", 
           title = 'Quadratic vs Linear model')
 
-db <- db  %>% mutate(yhat1r=predict(model3), yhat2r=predict(model4)) 
+db <- db  %>% mutate(yhat1r=predict(model5), yhat2r=predict(model4)) 
 
 summ <- db %>%  
   group_by(
@@ -365,33 +365,33 @@ set.seed(101111)
 
 B <- 1000
 
-estimates_model3<-rep(NA,B)
+estimates_model5<-rep(NA,B)
 
 for(i in 1:B){
   
   db_sample<- sample_frac(db,size=1,replace=TRUE) 
   #takes a sample with replacement of the same size of the original sample.
   
-  model3 <- lm(log_real_income  ~ age + age2, db_sample)
+  model5 <- lm(log_real_income  ~ age + age2, db_sample)
   
-  beta1r<-model3$coefficients[2] # gets the coefficient of interest 
-  beta2r <- model3$coefficients[3]
+  beta1r<-model5$coefficients[2] # gets the coefficient of interest 
+  beta2r <- model5$coefficients[3]
   
   age_maxbr <- -beta1r / (2 * beta2r)
   
-  estimates_model3[i]<- age_maxbr #saves it in the above vector
+  estimates_model5[i]<- age_maxbr #saves it in the above vector
 }
 
-length(estimates_model3)
+length(estimates_model5)
 
-plot(hist(estimates_model3))
+plot(hist(estimates_model5))
 
-meanpeakager <- mean(estimates_model3)
+meanpeakager <- mean(estimates_model5)
 
-sepeakager <- sqrt(var(estimates_model3))
+sepeakager <- sqrt(var(estimates_model5))
 
-ci_lowerr <- quantile(estimates_model3, 0.025)
-ci_upperr <- quantile(estimates_model3, 0.975)
+ci_lowerr <- quantile(estimates_model5, 0.025)
+ci_upperr <- quantile(estimates_model5, 0.975)
 
 ## Creating the summary table(s) with the relevant estimate statistics
 
