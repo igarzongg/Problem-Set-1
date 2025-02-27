@@ -112,6 +112,22 @@ db <- db %>%
          < 2 & m2r_std_residuals > -2 & 
            m3r_std_residuals < 2 & m3r_std_residuals > -2)
 
+## Estimation of age-wage reg -------------------------------------------------
+
+#Now that our db has studentized outliers
+
+model2 <- lm(log_nominal_income  ~ age,  data= db)
+
+model3 <- lm(log_nominal_income  ~ age + age2, data= db)
+
+model4 <- lm(log_real_income  ~ age,  data= db)
+
+model5 <- lm(log_real_income  ~ age + age2, data= db)
+
+
+
+
+
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
 
 model3 <- lm(log_nominal_income  ~ age + age2, data= db)
