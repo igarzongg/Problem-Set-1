@@ -2,13 +2,13 @@
 
 db <- db %>% mutate(age2= age^2)
 
-model2 <- lm(log_nominal_income  ~ age  data= db)
+model2 <- lm(log_nominal_income  ~ age,  data= db)
 
 model3 <- lm(log_nominal_income  ~ age + age2, data= db)
 
 model4 <- lm(log_real_income  ~ age,  data= db)
 
-model5 <- lm(log_real_income  ~ age + age2 data= db)
+model5 <- lm(log_real_income  ~ age + age2, data= db)
 
 stargazer(model2, model3, type="text", covariate.labels=c("Age","Agesq"))
 #Model results for Nominal Hourly Wage
@@ -312,28 +312,28 @@ ggplot() +
   # Confidence interval for Model 1
   geom_ribbon(
     data = summ, 
-    aes(x = age, ymin = lower_yhat1r, ymax = upper_yhat1r, fill = "Model 1"),
+    aes(x = age, ymin = lower_yhat1r, ymax = upper_yhat1r, fill = "Model 4"),
     alpha = 0.2
   ) +
   
   # Line for Model 1
   geom_line(
     data = summ, 
-    aes(x = age, y = yhat_reg1r, color = "Model 1"),
+    aes(x = age, y = yhat_reg1r, color = "Model 4"),
     linewidth = 1.5
   ) + 
   
   # Confidence interval for Model 2
   geom_ribbon(
     data = summ, 
-    aes(x = age, ymin = lower_yhat2r, ymax = upper_yhat2r, fill = "Model 2"),
+    aes(x = age, ymin = lower_yhat2r, ymax = upper_yhat2r, fill = "Model 5"),
     alpha = 0.2
   ) +
   
   # Line for Model 2
   geom_line(
     data = summ, 
-    aes(x = age, y = yhat_reg2r, color = "Model 2"),
+    aes(x = age, y = yhat_reg2r, color = "Model 5"),
     linewidth = 1.5
   ) +
   
