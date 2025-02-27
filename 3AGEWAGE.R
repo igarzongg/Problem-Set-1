@@ -312,28 +312,28 @@ ggplot() +
   # Confidence interval for Model 1
   geom_ribbon(
     data = summ, 
-    aes(x = age, ymin = lower_yhat1r, ymax = upper_yhat1r, fill = "Model 4"),
+    aes(x = age, ymin = lower_yhat1r, ymax = upper_yhat1r, fill = "Model 5"),
     alpha = 0.2
   ) +
   
   # Line for Model 1
   geom_line(
     data = summ, 
-    aes(x = age, y = yhat_reg1r, color = "Model 4"),
+    aes(x = age, y = yhat_reg1r, color = "Model 5"),
     linewidth = 1.5
   ) + 
   
   # Confidence interval for Model 2
   geom_ribbon(
     data = summ, 
-    aes(x = age, ymin = lower_yhat2r, ymax = upper_yhat2r, fill = "Model 5"),
+    aes(x = age, ymin = lower_yhat2r, ymax = upper_yhat2r, fill = "Model 4"),
     alpha = 0.2
   ) +
   
   # Line for Model 2
   geom_line(
     data = summ, 
-    aes(x = age, y = yhat_reg2r, color = "Model 5"),
+    aes(x = age, y = yhat_reg2r, color = "Model 4"),
     linewidth = 1.5
   ) +
   
