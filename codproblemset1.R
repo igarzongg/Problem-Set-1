@@ -21,6 +21,7 @@ p_load(rio,
        mosaic,
        officer,
        flextable,
+       grid,
        lintr)
 
 # IMPORTING DATABASES ----------------------------------------------------------
@@ -86,9 +87,9 @@ plot0
 
 #Real hourly salaries
 
-summary(db$y_salary_m_hu)
+summary(db$log_real_income)
 
-plot00 <- ggplot(db, aes(x = y_salary_m_hu )) +
+plot00 <- ggplot(db, aes(x = log_real_income )) +
   geom_histogram(bins = 50, fill = "darkblue") +
   labs(x = "Total Hourly Real Income", y = "N. Obs") +
   theme_bw() 
@@ -99,10 +100,10 @@ plot00
 #variable has a very long right tail. We will use the log of income instead.
 
 db <- db %>% 
-  mutate(y_ingLab_m_ha = ifelse(y_ingLab_m_ha>0, log(y_ingLab_m_ha), 0))
+  mutate(log_nominal_income = ifelse(y_ingLab_m_ha>0, log(y_ingLab_m_ha), 0))
 
 db <- db %>% 
-  mutate(y_salary_m_hu = ifelse(y_salary_m_hu>0, log(y_salary_m_hu), 0))
+  mutate(log_real_income = ifelse(y_salary_m_hu>0, log(y_salary_m_hu), 0))
 
 # DATA TRANSFORMATION  ---------------------------------------------------------
 
@@ -149,10 +150,20 @@ ggplot(tail(db_miss, 40), aes(x = reorder(skim_variable, +p_missing) ,
 
 ## Selecting interest variables some variables
 
+db <- db %>% #Household head variable created.
+  mutate(H_Head = ifelse( p6050== 1, 1, 0))
+
+db <- db %>% #Weekly work hours variable created
+  mutate(Weekly_Hours_Worked = totalHoursWorked)
+
+db <- db %>% #Weekly work hours variable created
+  mutate(Employment_Sector = relab)
+
+
 db_1 <- db %>% dplyr::select(directorio, secuencia_p, orden, female, age, ocu, 
-                       relab, p6050, totalHoursWorked,
-                    formal, sizeFirm, maxEducLevel, y_ingLab_m_ha,
-                    y_salary_m_hu)
+                       Employment_Sector, H_Head, Weekly_Hours_Worked,
+                    formal, sizeFirm, maxEducLevel, log_nominal_income,
+                    log_real_income)
 
 ## Look at the missing variables by type. 
 vis_dat(db_1)
@@ -182,12 +193,12 @@ vis_miss(db_missing_salary) #Aha! Most missing values in salary come from
 
 ## Mean / Median visualization of nominal salary
 
-ggplot(db, aes(y_ingLab_m_ha)) +
+ggplot(db, aes(log_nominal_income)) +
   geom_histogram(color = "#000000", fill = "#0099F8") +
-  geom_vline(xintercept = median(db$y_ingLab_m_ha, na.rm = TRUE),
+  geom_vline(xintercept = median(db$log_nominal_income, na.rm = TRUE),
              linetype = "dashed", 
              color = "red") +
-  geom_vline(xintercept = mean(db$y_ingLab_m_ha, na.rm = TRUE),
+  geom_vline(xintercept = mean(db$log_nominal_income, na.rm = TRUE),
              linetype = "dashed",
              color = "blue") +  
   ggtitle("Distribution of Log Nominal Hourly Salary (COP)") +
@@ -199,28 +210,28 @@ ggplot(db, aes(y_ingLab_m_ha)) +
 
 ##Imputing missing values using the median salary of informal workers.
 
-median_y_formal0 <- median(db$y_ingLab_m_ha[db$formal == 0], na.rm = TRUE)
+median_y_formal0 <- median(db$log_nominal_income[db$formal == 0], na.rm = TRUE)
 
-db$y_ingLab_m_ha <- ifelse(is.na(db$y_ingLab_m_ha) & db$formal == 0, 
+db$log_nominal_income <- ifelse(is.na(db$log_nominal_income) & db$formal == 0, 
                            median_y_formal0, 
-                           db$y_ingLab_m_ha)
+                           db$log_nominal_income)
 
 ## We will do the same for formal workers.
 
-median_y_formal1 <- median(db$y_ingLab_m_ha[db$formal == 1], na.rm = TRUE)
+median_y_formal1 <- median(db$log_nominal_income[db$formal == 1], na.rm = TRUE)
 
-db$y_ingLab_m_ha <- ifelse(is.na(db$y_ingLab_m_ha) & db$formal == 1, 
+db$log_nominal_income <- ifelse(is.na(db$log_nominal_income) & db$formal == 1, 
                            median_y_formal1, 
-                           db$y_ingLab_m_ha)
+                           db$log_nominal_income)
 
 ## Mean / Median visualization of real salary
 
-ggplot(db, aes(y_salary_m_hu)) +
+ggplot(db, aes(log_real_income)) +
   geom_histogram(color = "#000000", fill = "#0099F8") +
-  geom_vline(xintercept = median(db$y_salary_m_hu, na.rm = TRUE),
+  geom_vline(xintercept = median(db$log_real_income, na.rm = TRUE),
              linetype = "dashed", 
              color = "red") +
-  geom_vline(xintercept = mean(db$y_salary_m_hu, na.rm = TRUE),
+  geom_vline(xintercept = mean(db$log_real_income, na.rm = TRUE),
              linetype = "dashed",
              color = "blue") +  
   ggtitle("Distribution of Log Real Hourly Salary (COP)") +
@@ -231,45 +242,48 @@ ggplot(db, aes(y_salary_m_hu)) +
 
 ## Now, we check for how the data looks after the transformation.
 
-median_y_salary0 <- median(db$y_salary_m_hu[db$formal == 0], na.rm = TRUE)
+median_y_salary0 <- median(db$log_real_income[db$formal == 0], na.rm = TRUE)
 
-db$y_salary_m_hu <- ifelse(is.na(db$y_salary_m_hu) & db$formal == 0, 
+db$log_real_income <- ifelse(is.na(db$log_real_income) & db$formal == 0, 
                            median_y_salary0, 
-                           db$y_salary_m_hu)
+                           db$log_real_income)
 
 ## We will do the same for formal workers.
 
-median_y_salary1 <- median(db$y_salary_m_hu[db$formal == 1], na.rm = TRUE)
+median_y_salary1 <- median(db$log_real_income[db$formal == 1], na.rm = TRUE)
 
-db$y_salary_m_hu <- ifelse(is.na(db$y_salary_m_hu) & db$formal == 1, 
+db$log_real_income <- ifelse(is.na(db$log_real_income) & db$formal == 1, 
                            median_y_salary1, 
-                           db$y_salary_m_hu)
+                           db$log_real_income)
+
+
+
 
 db_1 <- db %>% dplyr::select(directorio, secuencia_p, orden, female, age, ocu, 
-                             relab, p6050, totalHoursWorked,
-                             formal, sizeFirm, maxEducLevel, y_ingLab_m_ha,
-                             y_salary_m_hu)
+                             Employment_Sector, H_Head, Weekly_Hours_Worked,
+                             formal, sizeFirm, maxEducLevel, log_nominal_income,
+                             log_real_income)
 
 vis_miss(db_1)
 
-ggplot(db, aes(y_ingLab_m_ha)) +
+ggplot(db, aes(log_nominal_income)) +
   geom_histogram(color = "#000000", fill = "#0099F8") +
-  geom_vline(xintercept = median(db$y_ingLab_m_ha, na.rm = TRUE),
+  geom_vline(xintercept = median(db$log_nominal_income, na.rm = TRUE),
              linetype = "dashed", 
              color = "red") +
-  geom_vline(xintercept = mean(db$y_ingLab_m_ha, na.rm = TRUE),
+  geom_vline(xintercept = mean(db$log_nominal_income, na.rm = TRUE),
              linetype = "dashed",
              color = "blue") +  
   ggtitle("Distribution of Log Nominal Hourly Salary (COP)") +
   theme_classic() +
   theme(plot.title = element_text(size = 18))
 
-ggplot(db, aes(y_salary_m_hu)) +
+ggplot(db, aes(log_real_income)) +
   geom_histogram(color = "#000000", fill = "#0099F8") +
-  geom_vline(xintercept = median(db$y_salary_m_hu, na.rm = TRUE),
+  geom_vline(xintercept = median(db$log_real_income, na.rm = TRUE),
              linetype = "dashed", 
              color = "red") +
-  geom_vline(xintercept = mean(db$y_salary_m_hu, na.rm = TRUE),
+  geom_vline(xintercept = mean(db$log_real_income, na.rm = TRUE),
              linetype = "dashed",
              color = "blue") +  
   ggtitle("Distribution of Log Real Hourly Salary (COP)") +
@@ -278,6 +292,70 @@ ggplot(db, aes(y_salary_m_hu)) +
 
 #Looks complete. The distribution for both income variables has now a median 
 #closer to the mean.
+
+#OUTLIERS ----------------------------------------------------------------------
+
+#NOMINAL VARIABLE
+#Winsorizing - Since distribution is not quite normal and we have skews.
+
+print("Checking quantiles before winsorization:")
+print(quantile(db$log_nominal_income, c(0.025, 0.975), na.rm = TRUE))
+
+print(paste("Max before winsorization:", max(db$log_nominal_income, na.rm = TRUE)))
+
+# Winsorizing at 97.5th percentile (adjusted slightly)
+up_threshold_nomh <- quantile(db$log_nominal_income, 0.975, na.rm = TRUE) - 0.001 
+# Adjust for rounding
+
+db$log_nominal_income <- ifelse(db$log_nominal_income > up_threshold_nomh,
+                           up_threshold_nomh, db$log_nominal_income)
+
+print(paste("Max after winsorization:", max(db$log_nominal_income, na.rm = TRUE)))
+
+# Verify the new summary
+summary(db$log_nominal_income)
+
+#REAL VARIABLE
+
+#Winsorizing - Since distribution is not quite normal and we have skews.
+
+print("Checking quantiles before winsorization:")
+print(quantile(db$log_real_income, c(0.025, 0.975), na.rm = TRUE))
+
+print(paste("Max before winsorization:", max(db$log_real_income, na.rm = TRUE)))
+
+# Winsorizing at 97.5th percentile (adjusted slightly)
+up_threshold_realh <- quantile(db$log_real_income, 0.975, na.rm = TRUE) - 0.001 
+# Adjust for rounding
+
+db$log_real_income <- ifelse(db$log_real_income > up_threshold_realh,
+                           up_threshold_realh, db$log_real_income)
+
+print(paste("Max after winsorization:", max(db$log_real_income, na.rm = TRUE)))
+
+# Verify the new summary
+summary(db$log_real_income)
+
+#TOTAL HOURS WORKED
+
+#Winsorizing - Since distribution is not quite normal and we have skews.
+
+print("Checking quantiles before winsorization:")
+print(quantile(db$Weekly_Hours_Worked, c(0.025, 0.975), na.rm = TRUE))
+
+print(paste("Max before winsorization:", max(db$Weekly_Hours_Worked, na.rm = TRUE)))
+
+# Winsorizing at 97.5th percentile (adjusted slightly)
+up_threshold_hw <- quantile(db$Weekly_Hours_Worked, 0.975, na.rm = TRUE) - 0.001 
+# Adjust for rounding
+
+db$Weekly_Hours_Worked <- ifelse(db$Weekly_Hours_Worked > up_threshold_hw,
+                              up_threshold_hw, db$Weekly_Hours_Worked)
+
+print(paste("Max after winsorization:", max(db$Weekly_Hours_Worked, na.rm = TRUE)))
+
+# Verify the new summary
+summary(db$Weekly_Hours_Worked)
 
 # DESCRIPTIVE VARIABLES --------------------------------------------------------
 
@@ -290,7 +368,6 @@ summary_table_female <- data.frame(
   Count = as.numeric(freq_table_female),     
   Proportion = round(as.numeric(prop_table_female), 4) 
 )
-print(summary_table_female, row.names = FALSE)
 
 db <- db %>% #Household head variable created.
   mutate(H_Head = ifelse( p6050== 1, 1, 0))
@@ -301,7 +378,6 @@ summary_table_HHead <- data.frame(
   Count = as.numeric(freq_table_HHead),     
   Proportion = round(as.numeric(prop_table_HHead), 4) 
 )
-print(summary_table_HHead, row.names = FALSE)
 
 db <- db %>% #Female HH variable created.
   mutate(Head_Female = H_Head*(female))
@@ -312,7 +388,6 @@ summary_table_HHeadF <- data.frame(
   Count = as.numeric(freq_table_HHeadF),     
   Proportion = round(as.numeric(prop_table_HHeadF), 4) 
 )
-print(summary_table_HHeadF, row.names = FALSE)
 
 db$maxEducLevel[is.na(db$maxEducLevel)] <- 1 
 #Assigns no education if there are missing values in our Max Education Variable.
@@ -329,7 +404,6 @@ summary_table_educ <- data.frame(
   Count = as.numeric(freq_table_educ),     
   Proportion = round(as.numeric(prop_table_educ), 4)  
 )
-print(summary_table_educ, row.names = FALSE)
 
 freq_table_form <- table(db$formal)
 prop_table_form <- prop.table(table(db$formal))
@@ -338,7 +412,6 @@ summary_table_form <- data.frame(
   Count = as.numeric(freq_table_form),
   Proportion = round(as.numeric(prop_table_form), 4)  
 )
-print(summary_table_form, row.names = FALSE)
 
 freq_table_sfirm <- table(db$sizeFirm)
 prop_table_sfirm <- prop.table(table(db$sizeFirm))
@@ -349,13 +422,12 @@ summary_table_sfirm <- data.frame(
   Count = as.numeric(freq_table_sfirm),
   Proportion = round(as.numeric(prop_table_sfirm), 4)  
 )
-print(summary_table_sfirm, row.names = FALSE)
 
-unique(db$relab)
-summary(db$relab)
+unique(db$Employment_Sector)
+summary(db$Employment_Sector)
 
-db$relab_factor <- factor(
-  db$relab, 
+db$Employment_Sector_factor <- factor(
+  db$Employment_Sector, 
   levels = 1:9, 
   labels = c(
     "1 (Private sector worker)", 
@@ -370,100 +442,99 @@ db$relab_factor <- factor(
   )
 )
 
-freq_table_relab <- table(db$relab_factor)
-prop_table_relab <- prop.table(freq_table_relab)
+freq_table_Employment_Sector <- table(db$Employment_Sector_factor)
+prop_table_Employment_Sector <- prop.table(freq_table_Employment_Sector)
 
-summary_table_relab <- data.frame(
-  Occupation = names(freq_table_relab),
-  Count = as.numeric(freq_table_relab),
-  Proportion = round(as.numeric(prop_table_relab), 4)
+summary_table_Employment_Sector <- data.frame(
+  Occupation = names(freq_table_Employment_Sector),
+  Count = as.numeric(freq_table_Employment_Sector),
+  Proportion = round(as.numeric(prop_table_Employment_Sector), 4)
 )
 
-print(summary_table_relab, row.names = FALSE)
+library(knitr)
+
+# Add a 'Variable' column to identify each categorical variable
+summary_table_female <- summary_table_female %>% 
+  mutate(Variable = "Female")
+summary_table_HHeadF <- summary_table_HHeadF %>% 
+  mutate(Variable = "Head_Female")
+summary_table_educ <- summary_table_educ %>% 
+  mutate(Variable = "maxEducLevel")
+summary_table_form <- summary_table_form %>%
+  mutate(Variable = "formal")
+summary_table_sfirm <- summary_table_sfirm %>% 
+  mutate(Variable = "sizeFirm")
+summary_table_Employment_Sector <- summary_table_Employment_Sector %>% 
+  mutate(Variable = "Employment_Sector")
+
+# Check column names before renaming
+print(colnames(summary_table_female))
+
+# Rename dynamically
+summary_table_female <- summary_table_female %>% 
+  rename(Category = everything()[1])
+summary_table_HHead <- summary_table_HHead %>% 
+  rename(Category = everything()[1])
+summary_table_HHeadF <- summary_table_HHeadF %>% 
+  rename(Category = everything()[1])
+summary_table_educ <- summary_table_educ %>% 
+  rename(Category = everything()[1])
+summary_table_form <- summary_table_form %>% 
+  rename(Category = everything()[1])
+summary_table_sfirm <- summary_table_sfirm %>% 
+  rename(Category = everything()[1])
+summary_table_Employment_Sector <- summary_table_Employment_Sector %>% 
+  rename(Category = everything()[1])
+
+# Bind all tables into one
+summary_table_categorical <- bind_rows(
+  summary_table_female,
+  summary_table_HHead,
+  summary_table_HHeadF,
+  summary_table_educ,
+  summary_table_form,
+  summary_table_sfirm,
+  summary_table_Employment_Sector
+)
+
+# Reorder columns
+summary_table_categorical <- summary_table_categorical %>% 
+  dplyr::select(Variable, Category, Count, Proportion)
+
+# Print formatted table
+kable(summary_table_categorical, 
+      caption = "Summary Statistics of Categorical Variables")
+
 
 #CONTINUOUS VARIABLES
 
-summary_table <- data.frame(
-  Statistic = c("N", "Mean", "St. Dev.", "Min", "Max"),
-  y_ingLab_m_ha = c(sum(!is.na(db$y_ingLab_m_ha)),
-                    mean(db$y_ingLab_m_ha, na.rm = TRUE),
-                    sd(db$y_ingLab_m_ha, na.rm = TRUE),
-                    min(db$y_ingLab_m_ha, na.rm = TRUE),
-                    max(db$y_ingLab_m_ha, na.rm = TRUE)),
-  y_salary_m_hu =  c(sum(!is.na(db$y_salary_m_hu)),
-                     mean(db$y_salary_m_hu, na.rm = TRUE),
-                     sd(db$y_salary_m_hu, na.rm = TRUE),
-                     min(db$y_salary_m_hu, na.rm = TRUE),
-                     max(db$y_salary_m_hu, na.rm = TRUE)),
-              age = c(sum(!is.na(db$age)),
-                      mean(db$age, na.rm = TRUE),
-                      sd(db$age, na.rm = TRUE),
-                      min(db$age, na.rm = TRUE),
-                      max(db$age, na.rm = TRUE)),
-              totalHoursWorked = c(sum(!is.na(db$age)),
-                      mean(db$age, na.rm = TRUE),
-                      sd(db$age, na.rm = TRUE),
-                      min(db$age, na.rm = TRUE),
-                      max(db$age, na.rm = TRUE))
-)
-print(summary_table)
+db <- as.data.frame(db)
 
-#OUTLIERS ----------------------------------------------------------------------
+db <- db %>%
+  mutate(exp_log_nominal_income =  exp(log_nominal_income))
+db <- db %>%
+  mutate(exp_log_real_income =  exp(log_real_income))
 
 
-##boxplot for Hours Worked
+# Select only numeric columns for summary statistics
+vars <- db[, c("log_nominal_income","log_real_income",
+               "exp_log_nominal_income", "exp_log_real_income", 
+               "age", "Weekly_Hours_Worked")]
 
-boxplotynomh <- ggplot(data= db, 
-       mapping = aes(y=y_ingLab_m_ha, x="")) +
-  theme_bw() +
-  geom_boxplot()  +
-  ggtitle("")+
-  ylab("Total Hours Worked")+
-  xlab("")
+# Generate the summary statistics table
+stargazer(vars, 
+          type = "text",       # Can be "text", "html", or "latex"
+          summary.stat = c("n", "mean", "sd", "min", "max"),
+          title = "Summary Statistics - Continuous Variables",
+          digits = 2, out='summarystatscont22.doc')
 
-low_nomh <- mean(db$y_ingLab_m_ha) - 2* sd(db$y_ingLab_m_ha)
-up_nomh <- mean(db$y_ingLab_m_ha) + 2* sd(db$y_ingLab_m_ha)
-
-cut_nomh <- boxplotynomh + geom_hline(yintercept = 
-                              low_nomh,linetype="solid",color="red",size=0.7) +
-  geom_hline(yintercept = up_nomh,linetype="solid",color="red",size=0.7)
-
-#Maybe it's more convenient to winsorize by quantiles
-
-#Winsorizing
-
-treshold_nomh<- quantile(db$y_ingLab_m_ha, 0.975, na.rm=T)
-
-
-db<- db %>% mutate(y_ingLab_m_ha= 
-                     ifelse( test=( y_ingLab_m_ha>= treshold_nomh), 
-                                                yes= treshold_nomh,
-                                                no= y_ingLab_m_ha))
-boxwinsornomh <-ggplot(data= db, 
-          mapping = aes(y=y_ingLab_m_ha, x="")) +
-  theme_bw() +
-  geom_boxplot()  +
-  ggtitle("")+
-  ylab("Log Nominal Hourly Wage")+
-  xlab("")
-
-low_nomh <- mean(db$y_ingLab_m_ha) - 2* sd(db$y_ingLab_m_ha)
-up_nomh <- mean(db$y_ingLab_m_ha) + 2* sd(db$y_ingLab_m_ha)
-
-boxwinsornomh <- boxwinsornomh +
-  geom_hline(yintercept = low_nomh,linetype="solid",color="blue",size=0.7) +
-  geom_hline(yintercept = up_nomh,linetype="solid",color="blue",size=0.7)
-boxwinsornomh
-
-
-grid.arrange(boxwinsornomh, cut_nomh, ncol = 2)
 
 #DESC. STATS GRAPHS ------------------------------------------------------------
 
 #Hourly salary distribution by age grouped by employment type 
 #(Formal or Informal)
 
-plot1 <- ggplot(db, aes(x = age, y = y_ingLab_m_ha, 
+plot1 <- ggplot(db, aes(x = age, y = log_nominal_income, 
                         color = as.factor(formal))) +
   geom_point() +
   scale_color_manual(
@@ -483,7 +554,7 @@ plot1
 
 #Distribution of Hourly Salary by Job Type
 
-plot2 <- ggplot(db, aes(x = as.factor(relab), y = y_ingLab_m_ha)) +
+plot2 <- ggplot(db, aes(x = as.factor(Employment_Sector), y = log_nominal_income)) +
   geom_boxplot(fill = "skyblue", color = "black") +
   labs(
     title = "Distribution of Hourly Salary by Job Type",
@@ -496,7 +567,7 @@ plot2 #Here we can start to identify a lot of observations with high leverage.
 
 #Density plot of Hourly Salary grouped by access to tertiary education
 
-plot3 <- ggplot(db, aes(x = y_ingLab_m_ha, fill = as.factor(maxEducLevel))) +
+plot3 <- ggplot(db, aes(x = log_nominal_income, fill = as.factor(maxEducLevel))) +
   geom_density(alpha = 0.5) +
   labs(
     title = "Hourly Salary Distribution by Education Level",
@@ -510,7 +581,7 @@ plot3
 #Histogram of Hourly Salary grouped by sex
 
 plot4 <- ggplot(data = db) + 
-  geom_histogram(mapping = aes(x = y_ingLab_m_ha, group = as.factor(female), 
+  geom_histogram(mapping = aes(x = log_nominal_income, group = as.factor(female), 
                                fill = as.factor(female)), bins = 30) + 
   scale_fill_manual(
     values = c("0" = "green", "1" = "purple"), 
@@ -531,7 +602,7 @@ plot4
 #Total hours worked by female household head-ship status
 
 
-plot6 <- ggplot(db, aes(x = as.factor(Head_Female), y = totalHoursWorked)) +
+plot6 <- ggplot(db, aes(x = as.factor(Head_Female), y = Weekly_Hours_Worked)) +
   geom_boxplot(fill = "skyblue", color = "black") +
   labs(
     title = "Total Hours Worked comparison with Female Household Heads",
@@ -547,13 +618,13 @@ plot6
 
 db <- db %>% mutate(age2= age^2)
 
-model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
+model1 <- lm(log_nominal_income  ~ age + age2, data= db)
 
-model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
+model2 <- lm(log_nominal_income  ~ age, data= db)
 
-model3 <- lm(y_salary_m_hu  ~ age + age2, data= db)
+model3 <- lm(log_real_income  ~ age + age2, data= db)
 
-model4 <- lm(y_salary_m_hu  ~ age, data= db)
+model4 <- lm(log_real_income  ~ age, data= db)
 
 stargazer(model1, model2, type="text", covariate.labels=c("Age","Agesq"))
 #Model results for Nominal Hourly Wage
@@ -659,7 +730,7 @@ db <- db %>%
 
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
 
-model1 <- lm(y_ingLab_m_ha  ~ age + age2, data= db)
+model1 <- lm(log_nominal_income  ~ age + age2, data= db)
 
 # Extract coefficients
 beta1 <- coef(model1)["age"]
@@ -670,7 +741,7 @@ age_max <- -beta1 / (2 * beta2)
 
 age_max #Income is maximized at this age 
 
-model2 <- lm(y_ingLab_m_ha  ~ age, data= db)
+model2 <- lm(log_nominal_income  ~ age, data= db)
 
 stargazer(model1, model2, type="text",
           covariate.labels=c("Age","Squared Age"), 
@@ -685,7 +756,7 @@ summ <- db %>%
     age, age2
   ) %>%  
   summarize(
-    mean_y = mean(y_ingLab_m_ha),
+    mean_y = mean(log_nominal_income),
     yhat_reg1 = mean(yhat1),
     yhat_reg2 = mean(yhat2), .groups="drop"
   ) 
@@ -776,7 +847,7 @@ for(i in 1:B){
   db_sample<- sample_frac(db,size=1,replace=TRUE) 
 #takes a sample with replacement of the same size of the original sample 
   
-  model1 <- lm(y_ingLab_m_ha  ~ age + age2, db_sample)
+  model1 <- lm(log_nominal_income  ~ age + age2, db_sample)
   
   beta1<-model1$coefficients[2] # gets the coefficient of interest 
   beta2 <- model1$coefficients[3]
@@ -799,7 +870,7 @@ ci_upper <- quantile(estimates_model1, 0.975)
 
 ## Estimation procedure for REAL Hourly Wage -----------------------------------
 
-model3 <- lm(y_salary_m_hu  ~ age + age2, data= db)
+model3 <- lm(log_real_income  ~ age + age2, data= db)
 
 # Extract coefficients
 beta1r <- coef(model3)["age"]
@@ -810,7 +881,7 @@ age_maxr <- -beta1r / (2 * beta2r)
 
 age_maxr #Income is maximized at this age 
 
-model4 <- lm(y_salary_m_hu  ~ age, data= db)
+model4 <- lm(log_real_income  ~ age, data= db)
 
 stargazer(model3, model4, type="text",
           covariate.labels=c("Age","Squared Age"), 
@@ -824,7 +895,7 @@ summ <- db %>%
     age, age2
   ) %>%  
   summarize(
-    mean_yr = mean(y_salary_m_hu),
+    mean_yr = mean(log_real_income),
     yhat_reg1r = mean(yhat1r),
     yhat_reg2r = mean(yhat2r), .groups="drop"
   ) 
@@ -917,7 +988,7 @@ for(i in 1:B){
   db_sample<- sample_frac(db,size=1,replace=TRUE) 
 #takes a sample with replacement of the same size of the original sample.
   
-  model3 <- lm(y_salary_m_hu  ~ age + age2, db_sample)
+  model3 <- lm(log_real_income  ~ age + age2, db_sample)
   
   beta1r<-model3$coefficients[2] # gets the coefficient of interest 
   beta2r <- model3$coefficients[3]
@@ -970,14 +1041,14 @@ stargazer(merged_table, summary = FALSE, type = "text",
 
 #a).
 
-model5 <- lm(y_ingLab_m_ha  ~ female, data= db)
+model5 <- lm(log_nominal_income  ~ female, data= db)
 
 stargazer(model5, type="text", 
           covariate.labels=c("Female"), 
           dep.var.labels = "Log Nominal Hourly Wage", 
           title = 'Unconditional Wage Gap Model')
 
-model6 <- lm(y_salary_m_hu  ~ female, data= db)
+model6 <- lm(log_real_income  ~ female, data= db)
 
 stargazer(model6, type="text", 
           covariate.labels=c("Female"), 
@@ -986,8 +1057,8 @@ stargazer(model6, type="text",
 
 #b).
 
-model7 <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
-            totalHoursWorked + formal + sizeFirm + maxEducLevel, data=db)
+model7 <- lm(log_nominal_income ~ female + age +age2 + Employment_Sector + Head_Female +
+            Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel, data=db)
 
 
 stargazer(model5, model7, type="text", 
@@ -1001,14 +1072,14 @@ stargazer(model5, model7, type="text",
 
 #FWL ---------------------------------------------------------------------------
 
-db<-db %>% mutate(femaleResidX=lm(female~ age + age2 + relab + Head_Female +
-                                    totalHoursWorked + formal + 
+db<-db %>% mutate(femaleResidX=lm(female~ age + age2 + Employment_Sector + Head_Female +
+                                    Weekly_Hours_Worked + formal + 
                                     sizeFirm + maxEducLevel, db)$residuals) 
 #Residuals of regression female ~ X 
 
-db<-db %>% mutate(loghwageResidX=lm(y_ingLab_m_ha~ age + age2  
-                                    + relab + Head_Female +
-                                    totalHoursWorked + formal + 
+db<-db %>% mutate(loghwageResidX=lm(log_nominal_income~ age + age2  
+                                    + Employment_Sector + Head_Female +
+                                    Weekly_Hours_Worked + formal + 
                                     sizeFirm + maxEducLevel, db)$residuals) 
 
 #Residuals of regression log nominal hourly wage ~ X 
@@ -1040,12 +1111,12 @@ sqrt(diag(vcov(model7)))[2] #Degrees of freedom have been succesfully adjusted.
 
 #Displaying regression and y_hat function by sex:
 
-model7men <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
-               totalHoursWorked + formal + sizeFirm + maxEducLevel, data=db,
+model7men <- lm(log_nominal_income ~ female + age +age2 + Employment_Sector + Head_Female +
+               Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel, data=db,
              subset = (female == 0))
 
-model7females <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
-                    totalHoursWorked + formal + sizeFirm + maxEducLevel,
+model7females <- lm(log_nominal_income ~ female + age +age2 + Employment_Sector + Head_Female +
+                    Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel,
                     data=db,
                   subset = (female == 1))
 
@@ -1061,7 +1132,7 @@ summ2 <- db %>%
     female, age, age2
   ) %>%  
   summarize(
-    mean_hourly_salary= mean(y_salary_m_hu),#Mean hourly salary for  sample
+    mean_hourly_salary= mean(log_real_income),#Mean hourly salary for  sample
     yhat_reg7men = mean(yhat1men), #Predicted avg. hourly salary for this male
     yhat_reg7females = mean(yhat2females), .groups="drop"
   ) #Predicted avg. hourly salary for this female
@@ -1150,16 +1221,16 @@ for(i in 1:B){
   
   #takes a sample with replacement of the same size of the original sample.
   
-  femaleResidXbs <- lm(female~ age + age2+ relab + Head_Female +
-                                      totalHoursWorked + formal + 
+  femaleResidXbs <- lm(female~ age + age2+ Employment_Sector + Head_Female +
+                                      Weekly_Hours_Worked + formal + 
                                       sizeFirm + maxEducLevel,
                                       data = db_sample)$residuals
 
   #Residuals of regression female ~ X 
   
-  loghwageResidXbs <- lm(y_ingLab_m_ha~ age +
-                                        age2 + relab + Head_Female +
-                                        totalHoursWorked + formal + 
+  loghwageResidXbs <- lm(log_nominal_income~ age +
+                                        age2 + Employment_Sector + Head_Female +
+                                        Weekly_Hours_Worked + formal + 
                                   sizeFirm + maxEducLevel, 
                                   data = db_sample)$residuals
   
@@ -1167,14 +1238,14 @@ for(i in 1:B){
   
   modelRESFWLbs <- lm(loghwageResidXbs~femaleResidXbs, db_sample)
   
-  model7bsmen <- lm(y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
-                 totalHoursWorked + formal + sizeFirm + maxEducLevel, 
+  model7bsmen <- lm(log_nominal_income ~ female + age +age2 + Employment_Sector + Head_Female +
+                 Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel, 
                  subset = (female == 0 ),
                  data=db_sample)
   
-  model7bsfemales <- lm(y_ingLab_m_ha ~ female + age +age2 + 
-                          relab + Head_Female +
-                      totalHoursWorked + formal + sizeFirm + maxEducLevel, 
+  model7bsfemales <- lm(log_nominal_income ~ female + age +age2 + 
+                          Employment_Sector + Head_Female +
+                      Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel, 
                     subset = (female == 1 ),
                     data=db_sample)
   
@@ -1272,7 +1343,7 @@ set.seed(10101)
 #a). 
 
 inTrain <- createDataPartition(
-  y = db$y_ingLab_m_ha,  ## the outcome data are needed
+  y = db$log_nominal_income,  ## the outcome data are needed
   p = .70, ## The percentage of training data
   list = FALSE
 )
@@ -1307,7 +1378,7 @@ ggplot(split_data, aes(x = Split, y = Count)) +
 # --------------- model 1 & model 2 results for Nominal Hourly Wage ------------
 # MODEL 1 ----------------------------------------------------------------------
 
-reg_1<- y_ingLab_m_ha ~ age + age2
+reg_1<- log_nominal_income ~ age + age2
 
 model1 <- lm(reg_1,
                data = training)
@@ -1316,13 +1387,13 @@ model1 <- lm(reg_1,
 prediction_model1 <- predict(model1, testing)
 
 
-score1<- RMSE(prediction_model1, testing$y_ingLab_m_ha )
+score1<- RMSE(prediction_model1, testing$log_nominal_income )
 score1
 # 0.3489662
 
 # MODEL 2 ----------------------------------------------------------------------
 
-reg_2<- y_ingLab_m_ha ~ age
+reg_2<- log_nominal_income ~ age
 
 model2 <- lm(reg_2,
               data = training)
@@ -1331,14 +1402,14 @@ model2 <- lm(reg_2,
 prediction_model2 <- predict(model2, testing)
 
 
-score2<- RMSE(prediction_model2, testing$y_ingLab_m_ha )
+score2<- RMSE(prediction_model2, testing$log_nominal_income )
 score2
 # 0.3510614
 
 # ---------- model 3 & model 4 results for real Hourly Wage -----------------
 # MODEL 3 ----------------------------------------------------------------------
 
-reg_3<- y_salary_m_hu  ~ age + age2
+reg_3<- log_real_income  ~ age + age2
 
 model3 <- lm(reg_3,
               data = training)
@@ -1347,13 +1418,13 @@ model3 <- lm(reg_3,
 prediction_model3 <- predict(model3, testing)
 
 
-score3<- RMSE(prediction_model3, testing$y_salary_m_hu )
+score3<- RMSE(prediction_model3, testing$log_real_income )
 score3
 # 0.3241643
 
 # MODEL 4 ----------------------------------------------------------------------
 
-reg_4<- y_salary_m_hu  ~ age 
+reg_4<- log_real_income  ~ age 
 
 model4 <- lm(reg_4,
               data = training)
@@ -1362,13 +1433,13 @@ model4 <- lm(reg_4,
 prediction_model4 <- predict(model4, testing)
 
 
-score4<- RMSE(prediction_model4, testing$y_salary_m_hu )
+score4<- RMSE(prediction_model4, testing$log_real_income )
 score4
 # 0.3254666
 
 # MODEL 5 ----------------------------------------------------------------------
 
-reg_5<- y_ingLab_m_ha  ~ female
+reg_5<- log_nominal_income  ~ female
 
 model5 <- lm(reg_5,
               data = training)
@@ -1377,13 +1448,13 @@ model5 <- lm(reg_5,
 prediction_model5 <- predict(model5, testing)
 
 
-score5<- RMSE(prediction_model5, testing$y_ingLab_m_ha )
+score5<- RMSE(prediction_model5, testing$log_nominal_income )
 score5
 # 0.3524142
 
 # MODEL 6 ----------------------------------------------------------------------
 
-reg_6 <- y_salary_m_hu  ~ female
+reg_6 <- log_real_income  ~ female
 
 model6 <- lm(reg_6,
               data = training)
@@ -1392,14 +1463,14 @@ model6 <- lm(reg_6,
 prediction_model6 <- predict(model6, testing)
 
 
-score6<- RMSE(prediction_model6, testing$y_salary_m_hu )
+score6<- RMSE(prediction_model6, testing$log_real_income )
 score6
 # 0.3263867 
 
 # MODEL 7 ----------------------------------------------------------------------
 
-reg_7 <- y_ingLab_m_ha ~ female + age +age2 + relab + Head_Female +
-  totalHoursWorked + formal + sizeFirm + maxEducLevel
+reg_7 <- log_nominal_income ~ female + age +age2 + Employment_Sector + Head_Female +
+  Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel
 
 model7 <- lm(reg_7,
               data = training)
@@ -1408,7 +1479,7 @@ model7 <- lm(reg_7,
 prediction_model7 <- predict(model7, testing)
 
 
-score7<- RMSE(prediction_model7, testing$y_ingLab_m_ha )
+score7<- RMSE(prediction_model7, testing$log_nominal_income )
 score7
 # 0.2709422
 
@@ -1416,7 +1487,7 @@ score7
 
 # MODELO 8 - polynomial regression (age^3) -------------------------------------
 
-reg_8 <- y_ingLab_m_ha ~ age + poly(age, 3) + female
+reg_8 <- log_nominal_income ~ age + poly(age, 3) + female
 
 model8 <- lm(reg_8, 
               data = training)
@@ -1425,32 +1496,31 @@ model8 <- lm(reg_8,
 
 prediction_model8 <- predict(model8, testing)
 
-score8 <- RMSE(prediction_model8, testing$y_ingLab_m_ha)
+score8 <- RMSE(prediction_model8, testing$log_nominal_income)
 score8
 # 0.3476926
 
 # MODELO 9 - polynomial regression on age, education and hours worked-----------
 # non-linearity in education and hours worked (posibles rendimientos marginales)
 
-reg_9 <- y_ingLab_m_ha ~ poly(age, 3) + poly(maxEducLevel, 2) +
+reg_9 <- log_nominal_income ~ poly(age, 3) + poly(maxEducLevel, 2) +
   
-  poly(totalHoursWorked, 2) + female + relab + formal + sizeFirm
+  poly(Weekly_Hours_Worked, 2) + female + Employment_Sector + formal + sizeFirm
 
-model9 <- lm(reg_9,data = training)
 model9 <- lm(reg_9, data = training)
 
 # PERFORMANCE RMSE 
 
 predictions_model9 <- predict(model9, testing)
 
-score9 <- RMSE(predictions_model9, testing$y_ingLab_m_ha)
+score9 <- RMSE(predictions_model9, testing$log_nominal_income)
 score9
 
 # 0.2672922
 
 # MODELO 10 - interaction age & gender -----------------------------------------
 
-reg_10 <- y_ingLab_m_ha ~ age+ age * female + age2 + relab + totalHoursWorked + 
+reg_10 <- log_nominal_income ~ age+ age * female + age2 + Employment_Sector + Weekly_Hours_Worked + 
   maxEducLevel
 model10 <- lm(reg_10, 
              data = training)
@@ -1459,15 +1529,15 @@ model10 <- lm(reg_10,
 
 prediction_model10 <- predict(model10, testing)
 
-score10 <- RMSE(prediction_model10, testing$y_ingLab_m_ha)
+score10 <- RMSE(prediction_model10, testing$log_nominal_income)
 score10
 # 0.312069
 
 # MODELO 11 - interaction formal work & gender ---------------------------------
 
-reg_11 <- y_ingLab_m_ha ~
+reg_11 <- log_nominal_income ~
   female+
-  formal*female + age + age2 + relab + totalHoursWorked + maxEducLevel + formal
+  formal*female + age + age2 + Employment_Sector + Weekly_Hours_Worked + maxEducLevel + formal
 model11 <- lm(reg_11, 
               data = training)
 
@@ -1475,16 +1545,16 @@ model11 <- lm(reg_11,
 
 prediction_model11 <- predict(model11, testing)
 
-score11 <- RMSE(prediction_model11, testing$y_ingLab_m_ha)
+score11 <- RMSE(prediction_model11, testing$log_nominal_income)
 score11
 # 0.2743492
 
 # MODELO 12 - multiple interactions --------------------------------------------
 
-reg_12 <- y_ingLab_m_ha ~ age + age2 + female + maxEducLevel + totalHoursWorked +
+reg_12 <- log_nominal_income ~ age + age2 + female + maxEducLevel + Weekly_Hours_Worked +
   formal + Head_Female +
   maxEducLevel * female +
-  formal * totalHoursWorked + age * Head_Female  + relab * totalHoursWorked
+  formal * Weekly_Hours_Worked + age * Head_Female  + Employment_Sector * Weekly_Hours_Worked
 
 model12 <- lm(reg_12, 
               data = training)
@@ -1493,7 +1563,7 @@ model12 <- lm(reg_12,
 
 prediction_model12 <- predict(model12, testing)
 
-score12 <- RMSE(prediction_model12, testing$y_ingLab_m_ha)
+score12 <- RMSE(prediction_model12, testing$log_nominal_income)
 score12
 
 # 0.2640155
@@ -1550,29 +1620,29 @@ print(paste("Best Model:", best_model_name, "with RMSE:", best_model_rmse))
 
 # Step 2: Retrieve predictions and compute residuals for the best model
 if (best_model_name == "Model 1") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model1
+  residuals_best <- testing$log_nominal_income - prediction_model1
 } else if (best_model_name == "Model 2") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model2
+  residuals_best <- testing$log_nominal_income - prediction_model2
 } else if (best_model_name == "Model 3") {
-  residuals_best <- testing$y_salary_m_hu - prediction_model3
+  residuals_best <- testing$log_real_income - prediction_model3
 } else if (best_model_name == "Model 4") {
-  residuals_best <- testing$y_salary_m_hu - prediction_model4
+  residuals_best <- testing$log_real_income - prediction_model4
 } else if (best_model_name == "Model 5") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model5
+  residuals_best <- testing$log_nominal_income - prediction_model5
 } else if (best_model_name == "Model 6") {
-  residuals_best <- testing$y_salary_m_hu - prediction_model6
+  residuals_best <- testing$log_real_income - prediction_model6
 } else if (best_model_name == "Model 7") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model7
+  residuals_best <- testing$log_nominal_income - prediction_model7
 } else if (best_model_name == "Model 8") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model8
+  residuals_best <- testing$log_nominal_income - prediction_model8
 } else if (best_model_name == "Model 9") {
-  residuals_best <- testing$y_ingLab_m_ha - predictions_model9
+  residuals_best <- testing$log_nominal_income - predictions_model9
 } else if (best_model_name == "Model 10") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model10
+  residuals_best <- testing$log_nominal_income - prediction_model10
 } else if (best_model_name == "Model 11") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model11
+  residuals_best <- testing$log_nominal_income - prediction_model11
 } else if (best_model_name == "Model 12") {
-  residuals_best <- testing$y_ingLab_m_ha - prediction_model12
+  residuals_best <- testing$log_nominal_income - prediction_model12
 }
 
 #Analyze residuals
@@ -1621,7 +1691,7 @@ cat("\nLOOCV training completed in:", round(training_time, 2), "minutes\n")
 cat("Average time per fold:", round(training_time/n_obs, 4), "minutes\n")
 model1_best_loocv
 
-score_best1 <-RMSE(model1_best_loocv$pred$pred, db$y_ingLab_m_ha)
+score_best1 <-RMSE(model1_best_loocv$pred$pred, db$log_nominal_income)
 score_best1
 
 ## Model 9 ---- second lowest predictive error 
@@ -1647,7 +1717,7 @@ cat("\nLOOCV training completed in:", round(training_time, 2), "minutes\n")
 cat("Average time per fold:", round(training_time/n_obs, 4), "minutes\n")
 model2_best_loocv
 
-score_best2 <-RMSE(model2_best_loocv$pred$pred, db$y_ingLab_m_ha)
+score_best2 <-RMSE(model2_best_loocv$pred$pred, db$log_nominal_income)
 score_best2
 
 
@@ -1740,6 +1810,7 @@ comparison <- data.frame(
 
 # Convert to flextable
 comparison_table <- flextable(comparison)
+print(comparison_table)
 
 # Create a Word document and add the table
 doc <- read_docx()
