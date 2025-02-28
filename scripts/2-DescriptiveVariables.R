@@ -23,8 +23,8 @@ summary_table_female <- data.frame(
 
 db <- db %>% 
   mutate(H_Head = ifelse( p6050== 1, 1, 0))
-freq_table_HHead <- table(db$H_Head)
-prop_table_HHead <- prop.table(table(db$H_Head))
+freq_table_HHead <- table(db$H_Head) # counting occurrences of each gender category
+prop_table_HHead <- prop.table(table(db$H_Head)) # compute proportions of each category
 summary_table_HHead <- data.frame(
   HouseholdStatus = c("0 (N/HH)", "1 (Household Head)"),  
   Count = as.numeric(freq_table_HHead),     
@@ -36,8 +36,8 @@ summary_table_HHead <- data.frame(
 
 db <- db %>% #Female HH variable created.
   mutate(Head_Female = H_Head*(female))
-freq_table_HHeadF <- table(db$Head_Female)
-prop_table_HHeadF <- prop.table(table(db$Head_Female))
+freq_table_HHeadF <- table(db$Head_Female) # counting occurrences of each gender category
+prop_table_HHeadF <- prop.table(table(db$Head_Female)) # compute proportions of each category
 summary_table_HHeadF <- data.frame(
   HHeadSex = c("0 (N/FHH)", "1 (Female Household Head)"),  
   Count = as.numeric(freq_table_HHeadF),     
@@ -51,8 +51,8 @@ db$maxEducLevel[is.na(db$maxEducLevel)] <- 1
 
 # Create frequency and proportion tables for education levels 
 
-freq_table_educ <- table(db$maxEducLevel) 
-prop_table_educ <- prop.table(table(db$maxEducLevel))
+freq_table_educ <- table(db$maxEducLevel) # counting occurrences of each gender category
+prop_table_educ <- prop.table(table(db$maxEducLevel)) # compute proportions of each category
 summary_table_educ <- data.frame(
   Academic_achievement = c("1 (None)", 
                            "3 (Primary incomplete)",
@@ -66,8 +66,8 @@ summary_table_educ <- data.frame(
 
 # Create frequency and proportion tables for employment type
 
-freq_table_form <- table(db$formal)
-prop_table_form <- prop.table(table(db$formal))
+freq_table_form <- table(db$formal) # counting occurrences of each gender category
+prop_table_form <- prop.table(table(db$formal)) # compute proportions of each category
 summary_table_form <- data.frame(
   Employment_type = c("0 (Informal)", "1 (Formal / Social Security)"),
   Count = as.numeric(freq_table_form),
@@ -76,8 +76,8 @@ summary_table_form <- data.frame(
 
 # Create frequency and proportion tables for firm size 
 
-freq_table_sfirm <- table(db$sizeFirm)
-prop_table_sfirm <- prop.table(table(db$sizeFirm))
+freq_table_sfirm <- table(db$sizeFirm) # counting occurrences of each gender category
+prop_table_sfirm <- prop.table(table(db$sizeFirm)) # compute proportions of each category
 summary_table_sfirm <- data.frame(
   Firm_size = c("self-employed ", "2-5 workers ", "6-10 workers ",
                 "11-50 workers", 
@@ -110,13 +110,13 @@ db$Employment_Sector_factor <- factor(
 
 # Creating frequency and proportion tables for emplyment sector 
 
-freq_table_Employment_Sector <- table(db$Employment_Sector_factor)
-prop_table_Employment_Sector <- prop.table(freq_table_Employment_Sector)
+freq_table_Employment_Sector <- table(db$Employment_Sector_factor) # counting occurrences of each gender category
+prop_table_Employment_Sector <- prop.table(freq_table_Employment_Sector) # compute proportions of each category
 
 summary_table_Employment_Sector <- data.frame(
   Occupation = names(freq_table_Employment_Sector),
   Count = as.numeric(freq_table_Employment_Sector),
-  Proportion = round(as.numeric(prop_table_Employment_Sector), 4)
+  Proportion = round(as.numeric(prop_table_Employment_Sector), 4) 
 )
 
 library(knitr)
@@ -195,5 +195,5 @@ stargazer(vars,
           type = "text",       # Can be "text", "html", or "latex"
           summary.stat = c("n", "mean", "sd", "min", "max"),
           title = "Summary Statistics - Continuous Variables",
-          digits = 2, out='summarystatscont22.doc')
+          digits = 2, out='summarystatscont22.htm')
 
