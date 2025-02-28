@@ -2,18 +2,11 @@
 
 #a).
 
-model5 <- lm(log_nominal_income  ~ female, data= db)
-
-stargazer(model5, type="text", 
-          covariate.labels=c("Female"), 
-          dep.var.labels = "Log Nominal Hourly Wage", 
-          title = 'Unconditional Wage Gap Model')
-
-model6 <- lm(log_real_income  ~ female, data= db)
+model6 <- lm(log_nominal_income  ~ female, data= db)
 
 stargazer(model6, type="text", 
           covariate.labels=c("Female"), 
-          dep.var.labels = "Log Real Hourly Wage", 
+          dep.var.labels = "Log Nominal Hourly Wage", 
           title = 'Unconditional Wage Gap Model')
 
 #b).
@@ -22,14 +15,18 @@ model7 <- lm(log_nominal_income ~ female + age +age2 + Employment_Sector + Head_
                Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel, data=db)
 
 
-stargazer(model5, model7, type="text", 
-          covariate.labels=c("Female", "Age", 'Age2', "Employment Sector",
-                             "Female Household Head", "Total Hours Worked", 
-                             "Formal", "Size of Firm", "Max. Education Level"), 
-          dep.var.labels = "Log Nominal Hourly Wage", 
-          title = 'Unconditional vs.Conditional Wage Gap Model', 
-          out = "regression_tablepunto41.doc")
+omit_vars <- c("age", "age2", "Employment_Sector", "Head_Female", 
+               "Weekly_Hours_Worked", "formal", "sizeFirm", "maxEducLevel")
 
+# Generate the table
+stargazer(model6, model7, type = "text",
+          covariate.labels = c("Female"),  # Only show "Female"
+          dep.var.labels = "Log Nominal Hourly Wage",
+          title = "Unconditional vs. Conditional Wage Gap Model",
+          column.labels = c("Model 6", "Model 7"),  # Label models explicitly
+          omit = omit_vars,  # Hide control variables
+          notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education.",
+    )
 
 #FWL ---------------------------------------------------------------------------
 
@@ -45,8 +42,8 @@ db<-db %>% mutate(loghwageResidX=lm(log_nominal_income~ age + age2
 
 #Residuals of regression log nominal hourly wage ~ X 
 
-modelRESFWL <- lm(loghwageResidX~femaleResidX, db)
-stargazer(model7, modelRESFWL, type="text",digits=7,
+model7FWL <- lm(loghwageResidX~femaleResidX, db)
+stargazer(model7, model7FWL, type="text",digits=7,
           covariate.labels=c("Female", "Age", "Employment Sector",
                              "Female Household Head", "Total Hours Worked", 
                              "Formal", "Size of Firm", "Max. Education Level", "FWL estimate"), 
@@ -54,14 +51,14 @@ stargazer(model7, modelRESFWL, type="text",digits=7,
           title = 'OLS vs FWL estimates')
 
 SSROLSmodel7 <-sum(resid(model7)^2)
-SSRFWLmodel7 <-sum(resid(modelRESFWL)^2) #Both models have the same SSR.
+SSRFWLmodel7 <-sum(resid(model7FWL)^2) #Both models have the same SSR.
 
 ##Adjusting the degrees of freedom by the 7 residualized predictors:
 
 df_OLSmodel7 = model7$df[1]
-df_FWLmodel7 = modelRESFWL$df[1]
+df_FWLmodel7 = model7FWL$df[1]
 
-sqrt(diag(vcov(modelRESFWL))*(df_FWLmodel7/df_OLSmodel7))[2]
+sqrt(diag(vcov(model7FWL))*(df_FWLmodel7/df_OLSmodel7))[2]
 
 sqrt(diag(vcov(model7)))[2] #Degrees of freedom have been succesfully adjusted.
 #Standard error now matches the one of the original regression.
@@ -145,7 +142,7 @@ ggplot() +
   
   # Labels and title
   labs(
-    title = "Predicted Age-Wage Profile with Confidence Intervals by Sex",
+    title = "Predicted Age-Wage Profile with CIs by Sex",
     subtitle = "Based on regression models estimated separately for
     males and females",
     x = "Age",
@@ -153,7 +150,7 @@ ggplot() +
     color = "Sex",
     caption = "Note: Predicted values are 
     from separate regressions for males and females.\nConfidence 
-    intervals represent 95% uncertainty bands."
+    intervals (CIs) represent 95% uncertainty bands."
   ) +
   
   #Theme
@@ -197,7 +194,7 @@ for(i in 1:B){
   
   #Residuals of regression log nominal hourly wage ~ X 
   
-  modelRESFWLbs <- lm(loghwageResidXbs~femaleResidXbs, db_sample)
+  model7FWLbs <- lm(loghwageResidXbs~femaleResidXbs, db_sample)
   
   model7bsmen <- lm(log_nominal_income ~ female + age +age2 + Employment_Sector + Head_Female +
                       Weekly_Hours_Worked + formal + sizeFirm + maxEducLevel, 
@@ -210,7 +207,7 @@ for(i in 1:B){
                         subset = (female == 1 ),
                         data=db_sample)
   
-  beta1RES_fwlbs <-modelRESFWLbs$coefficients[2] 
+  beta1RES_fwlbs <-model7FWLbs$coefficients[2] 
   # gets the coefficient of interest 
   
   beta1_fwlbsmen <- model7bsmen$coefficients[3]
@@ -277,10 +274,10 @@ summary_table1bsfemales <- data.frame(
 merged_table2 <- merge(summary_table1bsmen,
                        summary_table1bsfemales, by = "Statistic")
 
-# Printing table
+# Printing table - Peak age by gender
 stargazer(merged_table2, summary = FALSE, type = "text",
           title = "Bootstrap Peak Age Estimates by Sex", digits = 2
-          ,out = "regression_table42.doc" )
+          )
 
 #Creating FWL Bootstrap 'female' coefficient estimation table:
 
@@ -289,10 +286,22 @@ summary_tableBETA1s <- data.frame(
                 "Lower 95% CI", "Upper 95% CI", 'FWL-only value', 'OLS value'),
   Beta1Coef_Value = c(meancoefFWLbs, secoefFWLbs, 
                       ci_lowercoefFWLbs, ci_uppercoefFWLbs, 
-                      modelRESFWL$coefficients[2], model7$coefficients[2])
+                      model7FWL$coefficients[2], model7$coefficients[2])
 )
 
-# Printing table
+# Printing table - Bootstrap 'female' coefficient estimation table:
 stargazer(summary_tableBETA1s, summary = FALSE, type = "text",
           title = "Bootstrap + FWL Coefficient Stats vs FWL and OLS Coefficients", 
-          digits = 4, out = "regression_table43.doc")
+          digits = 4)
+
+stargazer(model6, model7, model7FWL, 
+          type = "text",
+          covariate.labels = c("Female", "Female FWL"),  # Only show "Female"
+          dep.var.labels = c("Log Nominal Hourly Wage", "Residualized Log Nominal Hourly Wage"),
+          title = "Regression Results: Wage Gap Models",
+          column.labels = c("Model 6", "Model 7", "Model 7 FWL"
+                      ),  # Explicit model names
+          omit = omit_vars,  # Hide control variables
+          notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education. FWL refers to the Frisch-Waugh-Lovell decomposition. Bootstrap models account for resampling variability.",
+          out = "regression_results41.html")
+
