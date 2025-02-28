@@ -195,5 +195,5 @@ stargazer(vars,
           type = "text",       # Can be "text", "html", or "latex"
           summary.stat = c("n", "mean", "sd", "min", "max"),
           title = "Summary Statistics - Continuous Variables",
-          digits = 2, out='summarystatscont22.doc')
+          digits = 2, out='summarystatscont22.htm')
 
