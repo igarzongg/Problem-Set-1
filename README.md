@@ -10,11 +10,11 @@ This repository contains the following folders:
 
 - document:
 ---
-- scripts:
-  
-The `scripts/` folder contains the following files, which include functions and analysis in R for this project:
 
-     **Scripts available:**
+**scripts:**
+  The `scripts/` folder contains the following files, which include functions and analysis in R for this project:
+
+  **Scripts available:**
      
     - [Cleaning Data](scripts/1-CleaningData.R) – Loads and cleans the dataset.  
     - [Descriptive Variables](scripts/2-DescriptiveVariables.R) – Computes summary statistics.  
@@ -23,6 +23,7 @@ The `scripts/` folder contains the following files, which include functions and 
     - [Predicting Earnings](scripts/5.PredictingEarnings.R) - Uses alternative tests to evaluate the predictive pattern of previews specifications
 
 Each script is documented with comments to facilitate the understanding and usage of the code.
+
 ---
 
 - stores
