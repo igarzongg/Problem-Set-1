@@ -11,7 +11,7 @@ This repository contains the following folders:
 - document
 - scripts:
   The `scripts/` folder contains the following files, which include functions and analysis in R for this project:
-         - [Data Loading and Cleaning] (scripts/1-CleaningData.R)   
+         - [Script_1] (scripts/1-CleaningData.R)   
          - [Script 2](scripts/script2.R) – Descriptive Variables.  
          - [Script 3](scripts/script3.R) – Age-Wage Profile.  
          - [Script 4](scripts/script4.R) – Gender Earnings Gap.  
