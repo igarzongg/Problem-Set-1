@@ -10,9 +10,10 @@
 #a) Unconditional Wage Gap Model
 
 # Estimate a linear regression to examine the effect of gender on log nominal hourly wage
+
 model6 <- lm(log_nominal_income  ~ female, data= db)
 
-# Display regression results for real wage model in a formatted table
+# Display regression results for nominal wage model in a formatted table
 stargazer(model6, type="text", 
           covariate.labels=c("Female"), 
           dep.var.labels = "Log Nominal Hourly Wage", 
