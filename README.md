@@ -14,15 +14,11 @@ This repository contains the following folders:
 **scripts:**
   The `scripts/` folder contains the following files, which include functions and analysis in R for this project:
 
-Scripts available
-     
-    - [Cleaning Data](scripts/1-CleaningData.R) - Loads and cleans the dataset.  
-    - [Descriptive Variables](scripts/2-DescriptiveVariables.R) – Computes summary statistics.  
-    - [Age-Wage Profile](scripts/3-AgeWageProfile.R) – Analyzes wage distribution by age.  
-    - [Gender Earnings Gap](scripts/4-GenderEarningsGap.R) – Investigates gender-based wage differences.
-    - [Predicting Earnings](scripts/5-PredictingEarnings.R) - Uses alternative tests to evaluate the predictive pattern of previews specifications
-
-Each script is documented with comments to facilitate the understanding and usage of the code.
+- [Cleaning Data](scripts/1-CleaningData.R): Loads and cleans the dataset.  
+- [Descriptive Variables](scripts/2-DescriptiveVariables.R): Computes summary statistics.  
+- [Age-Wage Profile](scripts/3-AgeWageProfile.R): Analyzes wage distribution by age.  
+- [Gender Earnings Gap](scripts/4-GenderEarningsGap.R): Investigates gender-based wage differences.  
+- [Predicting Earnings](scripts/5-PredictingEarnings.R): Uses alternative tests to evaluate the predictive pattern of previous specifications.  
 
 ---
 
