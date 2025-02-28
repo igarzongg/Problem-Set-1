@@ -473,5 +473,5 @@ merged_table <- data.frame(
 # Print merged table 
 stargazer(merged_table, summary = FALSE, type = "text",
      title = "Comparison of Nominal and Real Bootstrap Estimates of Peak Age", 
-          digits = 2, out = "regression_table33.doc")
+         digits = 2)
 
