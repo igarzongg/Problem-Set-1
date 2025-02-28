@@ -11,11 +11,11 @@ This repository contains the following folders:
 - document
 - scripts:
   The `scripts/` folder contains the following files, which include functions and analysis in R for this project:
-         - [1](scripts/DataCleaning.R) – Cleaning and Importing Data.  
-         - [2](scripts/DescriptiveVariables.R) – Descriptive Variables.  
-         - [3](scripts/AgeWageProfile.R) – Age-Wage Profile.  
-         - [4](scripts/GenderEarningsGap.R) – Gender Earnings Gap.  
-         - [5](scripts/PredictingEarnings.R) – Predicting Earnings.
+         - [Script 1] (https://github.com/igarzongg/Problem-Set-1/blob/main/scripts/1-CleaningData.R) – Data loading and cleaning.  
+         - [Script 2](scripts/script2.R) – Descriptive Variables.  
+         - [Script 3](scripts/script3.R) – Age-Wage Profile.  
+         - [Script 4](scripts/script4.R) – Gender Earnings Gap.  
+         - [Script 5](scripts/script5.R) – Predicting Earnings.  
   Each script is documented with comments to facilitate the understanding and usage of the code.
 - stores
 - views 
