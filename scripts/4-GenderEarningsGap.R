@@ -30,15 +30,17 @@ omit_vars <- c("age", "age2", "Employment_Sector", "Head_Female",
                "Weekly_Hours_Worked", "formal", "sizeFirm", "maxEducLevel")
 
 # Generate the table
-stargazer(model6, model7, type = "text",
-          covariate.labels = c("Female"),  # Only show "Female"
-          dep.var.labels = "Log Nominal Hourly Wage",
+stargazer(model6, model7, 
+          type = "text",
+          covariate.labels = c("Female"),  
+          dep.var.labels = c("Log Nominal Hourly Wage"),
           title = "Unconditional vs. Conditional Wage Gap Model",
-          column.labels = c("Model 6", "Model 7"),  # Label models explicitly
-          omit = omit_vars,  # Hide control variables
+          column.labels = c("Model 6", "Model 7"),  
+          omit = omit_vars,  
           notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education.",
-    )
-
+          style = "default",    # Explicitly setting style
+          align = TRUE          # Ensure proper alignment
+)
 # FWL (Frisch-Waugh-Lovell) Decomposition --------------------------------------
 
 # Compute residuals of female  ~ X 
@@ -120,6 +122,9 @@ summ2_females <- summ2 %>% filter(!is.na(yhat_reg7females)) #Data for females
 
 #GRAPHING
 
+# Open PDF device for saving in latex
+pdf("../views/age_wage_plot_by_sex.pdf", width = 7, height = 5)  
+
 # Compute standard errors for confidence intervals
 summ2_men <- summ2_men %>%
   mutate(se = sd(yhat_reg7men, na.rm = TRUE) / sqrt(n()),
@@ -177,6 +182,9 @@ ggplot() +
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 11))
 
+
+# Close PDF device and saves in latex
+dev.off()
 
 #BOOTSTRAPPING
 
@@ -322,13 +330,13 @@ stargazer(summary_tableBETA1s, summary = FALSE, type = "text",
 
 # Printing table - Regression results for wage gap models
 stargazer(model6, model7, model7FWL, 
-          type = "text",
-          covariate.labels = c("Female", "Female FWL"),  # Only show "Female"
+          type = "latex",  # Change to LaTeX format
+          covariate.labels = c("Female", "Female FWL"),  
           dep.var.labels = c("Log Nominal Hourly Wage", "Residualized Log Nominal Hourly Wage"),
           title = "Regression Results: Wage Gap Models",
-          column.labels = c("Model 6", "Model 7", "Model 7 FWL"
-                      ),  # Explicit model names
+          column.labels = c("Model 6", "Model 7", "Model 7 FWL"),  
           omit = omit_vars,  # Hide control variables
-          notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education. 
-          FWL refers to the Frisch-Waugh-Lovell decomposition. Bootstrap models account for resampling variability.",
-          out = "regression_results41.html")
+          notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education. FWL refers to the Frisch-Waugh-Lovell decomposition. Bootstrap models account for resampling variability.",
+          out = "../views/regression_results41.tex")  # Save in 'views' folder
+
+

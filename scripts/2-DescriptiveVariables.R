@@ -190,10 +190,16 @@ vars <- db[, c("log_nominal_income","log_real_income",
                "exp_log_nominal_income", "exp_log_real_income", 
                "age", "Weekly_Hours_Worked")]
 
+#Creates views folder
+
+if (!dir.exists("../views")) dir.create("../views")
+
 # Generate summary statistics table
 stargazer(vars, 
-          type = "text",       # Can be "text", "html", or "latex"
+          type = "latex",       # Export as LaTeX
           summary.stat = c("n", "mean", "sd", "min", "max"),
           title = "Summary Statistics - Continuous Variables",
-          digits = 2, out='summarystatscont22.htm')
+          digits = 2, 
+          out = "../views/summarystatscont22.tex")  # Save in 'views' folder
+
 

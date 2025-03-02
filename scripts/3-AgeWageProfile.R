@@ -149,6 +149,7 @@ model4 <- lm(log_real_income  ~ age,  data= db)
 model5 <- lm(log_real_income  ~ age + age2, data= db)
 
 # Displaying final regression results after cleaning data 
+
 stargazer(model2, model3, model4, model5, 
           title = "Regression Results: Nominal and Real Income",
           align = TRUE,
@@ -159,8 +160,8 @@ stargazer(model2, model3, model4, model5,
           omit.stat = c("f", "ser"),
           notes = "This table presents the estimation results for nominal and real income models, considering age and its quadratic term. Standard errors are in parentheses.",
           notes.align = "l",
-          type = "text",
-          out = "regtable31.htm")
+          type = "latex",  # Change to LaTeX format
+          out = "../views/regtable31.tex")  # Save in 'views' folder
 
 
 ## Estimation procedure for NOMINAL Hourly Wage --------------------------------
@@ -208,6 +209,10 @@ summ <- summ %>%
   )
 
 # Graphing with confidence intervals and proper formatting
+
+# Open PDF device for saving in latex
+pdf("../views/age_wage_plot.pdf", width = 7, height = 5)  
+
 ggplot() + 
   # Scatter plot of observed mean hourly wages
   geom_point(
@@ -264,6 +269,9 @@ ggplot() +
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 11)
   )
+
+# Close PDF device and saves in latex
+dev.off()
 
 
 ## Finding the 'peak-age' with CI's according by bootstrapping the model for nominal wages

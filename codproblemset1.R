@@ -473,8 +473,6 @@ print(colnames(summary_table_female))
 # Rename dynamically
 summary_table_female <- summary_table_female %>% 
   rename(Category = everything()[1])
-summary_table_HHead <- summary_table_HHead %>% 
-  rename(Category = everything()[1])
 summary_table_HHeadF <- summary_table_HHeadF %>% 
   rename(Category = everything()[1])
 summary_table_educ <- summary_table_educ %>% 
@@ -489,7 +487,6 @@ summary_table_Employment_Sector <- summary_table_Employment_Sector %>%
 # Bind all tables into one
 summary_table_categorical <- bind_rows(
   summary_table_female,
-  summary_table_HHead,
   summary_table_HHeadF,
   summary_table_educ,
   summary_table_form,
@@ -554,7 +551,8 @@ plot1
 
 #Distribution of Hourly Salary by Job Type
 
-plot2 <- ggplot(db, aes(x = as.factor(Employment_Sector), y = log_nominal_income)) +
+plot2 <- ggplot(db, aes(x = as.factor(Employment_Sector),
+                        y = log_nominal_income)) +
   geom_boxplot(fill = "skyblue", color = "black") +
   labs(
     title = "Distribution of Hourly Salary by Job Type",
@@ -567,7 +565,8 @@ plot2 #Here we can start to identify a lot of observations with high leverage.
 
 #Density plot of Hourly Salary grouped by access to tertiary education
 
-plot3 <- ggplot(db, aes(x = log_nominal_income, fill = as.factor(maxEducLevel))) +
+plot3 <- ggplot(db, aes(x = log_nominal_income, 
+                        fill = as.factor(maxEducLevel))) +
   geom_density(alpha = 0.5) +
   labs(
     title = "Hourly Salary Distribution by Education Level",
@@ -581,7 +580,8 @@ plot3
 #Histogram of Hourly Salary grouped by sex
 
 plot4 <- ggplot(data = db) + 
-  geom_histogram(mapping = aes(x = log_nominal_income, group = as.factor(female), 
+  geom_histogram(mapping = aes(x = log_nominal_income, group
+                               = as.factor(female), 
                                fill = as.factor(female)), bins = 30) + 
   scale_fill_manual(
     values = c("0" = "green", "1" = "purple"), 
