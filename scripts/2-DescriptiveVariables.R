@@ -194,12 +194,40 @@ vars <- db[, c("log_nominal_income","log_real_income",
 
 if (!dir.exists("../views")) dir.create("../views")
 
-# Generate summary statistics table
+# Generate summary statistics table (HTML)
+
+library(stargazer)
+
+# Define variable names for display
+var_labels <- c(
+  "log_nominal_income" = "Log. Nominal hourly wage",
+  "log_real_income" = "Log. Real hourly wage",
+  "exp_log_nominal_income" = "Nominal hourly wage",
+  "exp_log_real_income" = "Real hourly wage",
+  "age" = "Age",
+  "Weekly_Hours_Worked" = "Weekly work hours"
+)
+
+# Generate summary statistics table in HTML format
+stargazer(vars, 
+          type = "html", 
+          summary.stat = c("n", "mean", "sd", "min", "max"), 
+          title = "Table 1. Descriptive statistics – continuous variables",
+          digits = 2,
+          notes = "Note: This table presents the descriptivte statistics for the continuous variables used in this project.",
+          notes.align = "l",
+          out = "../views/summarystatscont22.htm")  # Save in 'views' folder
+
+
+# Generate summary statistics table (LATEX)
+
 stargazer(vars, 
           type = "latex",       # Export as LaTeX
           summary.stat = c("n", "mean", "sd", "min", "max"),
           title = "Summary Statistics - Continuous Variables",
           digits = 2, 
+          notes = "Note: This table presents the descriptivte statistics for the continuous variables used in this project.",
+          notes.align = "l",
           out = "../views/summarystatscont22.tex")  # Save in 'views' folder
 
 

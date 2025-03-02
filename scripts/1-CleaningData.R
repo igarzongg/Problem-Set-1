@@ -6,7 +6,7 @@
 
 # ------------------- IMPORTING & CLEANING DATA --------------------------------
 
-# LOAD REQUIRED LIBRARIES ------------------------------------------------------------
+# LOAD REQUIRED LIBRARIES ------------------------------------------------------
 
 # Use the library "pacman" to efficiently load multiple packages
 
@@ -25,7 +25,7 @@ p_load(rio,        # Data import/export
        MASS,       # Statistical functions
        mosaic,     # Data analysis and visualization
        officer,    # Report generation
-       flextable,  # Tables for reporting
+       kableExtra,  # Tables for reporting
        grid,       # Graphics
        lintr)      # Code linting
 

@@ -61,7 +61,7 @@ prediction_model1 <- predict(model1, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score1<- RMSE(prediction_model1, testing$log_nominal_income )
 score1
-# RMSE : 0.3489662
+# RMSE : 0.3407032
 
 # MODEL 2 ----------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ prediction_model2 <- predict(model2, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score2<- RMSE(prediction_model2, testing$log_nominal_income )
 score2
-# RMSE :0.3510614
+# RMSE :0.342309
 
 # ---------- model 3 & model 4 results for real Hourly Wage -----------------
 # MODEL 3 ----------------------------------------------------------------------
@@ -93,7 +93,7 @@ prediction_model3 <- predict(model3, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score3<- RMSE(prediction_model3, testing$log_real_income )
 score3
-# RMSE :0.3241643
+# RMSE :0.313405
 
 # MODEL 4 ----------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ prediction_model4 <- predict(model4, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score4<- RMSE(prediction_model4, testing$log_real_income )
 score4
-# RMSE :0.3254666
+# RMSE :0.3144627
 
 # MODEL 5 ----------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ prediction_model5 <- predict(model5, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score5<- RMSE(prediction_model5, testing$log_nominal_income )
 score5
-# RMSE :0.3524142
+# RMSE :0.3436428
 
 # MODEL 6 ----------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ prediction_model6 <- predict(model6, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score6<- RMSE(prediction_model6, testing$log_real_income )
 score6
-# RMSE :0.3263867 
+# RMSE :0.3153226
 
 # MODEL 7 ----------------------------------------------------------------------
 
@@ -158,13 +158,13 @@ prediction_model7 <- predict(model7, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score7<- RMSE(prediction_model7, testing$log_nominal_income )
 score7
-# RMSE :0.2709422
+# RMSE : 0.2581407
 
 # Non-linear ModelS ------------------------------------
 
 # MODELO 8 - polynomial regression (age^3) -------------------------------------
 
-reg_8 <- log_nominal_income ~ age + poly(age, 3) + female
+reg_8 <- log_nominal_income ~ poly(age, 3) + female
 
 model8 <- lm(reg_8, 
              data = training)
@@ -176,7 +176,7 @@ prediction_model8 <- predict(model8, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score8 <- RMSE(prediction_model8, testing$log_nominal_income)
 score8
-# RMSE :0.3476926
+# RMSE :0.3392703
 
 # MODELO 9 - polynomial regression on age, education and hours worked-----------
 # non-linearity in education and hours worked 
@@ -195,7 +195,7 @@ predictions_model9 <- predict(model9, testing)
 score9 <- RMSE(predictions_model9, testing$log_nominal_income)
 score9
 
-# RMSE :0.2672922
+# RMSE :0.255105
 
 # MODELO 10 - interaction age & gender -----------------------------------------
 
@@ -211,7 +211,7 @@ prediction_model10 <- predict(model10, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score10 <- RMSE(prediction_model10, testing$log_nominal_income)
 score10
-# RMSE :0.312069
+# RMSE :0.3040034
 
 # MODELO 11 - interaction formal work & gender ---------------------------------
 
@@ -228,7 +228,7 @@ prediction_model11 <- predict(model11, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score11 <- RMSE(prediction_model11, testing$log_nominal_income)
 score11
-# RMSE :0.2743492
+# RMSE :0.2612098
 
 # MODELO 12 - multiple interactions --------------------------------------------
 
@@ -248,13 +248,12 @@ prediction_model12 <- predict(model12, testing)
 score12 <- RMSE(prediction_model12, testing$log_nominal_income)
 score12
 
-# RMSE :0.2640155
+# RMSE :0.2535921
 
 # PERFORMANCE RESULT TABLE -----------------------------------------------------
 
 # Load libraries
 library(officer)
-library(flextable)
 
 # Create the data frame
 results <- data.frame(
@@ -263,7 +262,8 @@ results <- data.frame(
             "Model 7", "Model 8", "Model 9", 
             "Model 10", "Model 11", "Model 12"),
   RMSE = c(score1, score2, score3, score4, score5, score6, score7, 
-           score8, score9, score10, score11, score12)
+           score8, score9, score10, score11, score12),
+  row.names = NULL
 )
 
 # Order by RMSE
@@ -273,21 +273,31 @@ results <- results[order(results$RMSE), ]
 lowest <- results$model[1]
 lowest_RMSE <- results$RMSE[1]
 
-# Create a flextable for formatting
-results_table <- flextable(results) %>%
-  theme_vanilla() %>%  # Optional: Apply a clean theme
-  autofit()  # Adjust column widths automatically
+## Ensures 'results' is a clean data frame with no row names
+results <- results[, c("model", "RMSE")]  # Keeps only the needed columns
+colnames(results) <- c("Model", "RMSE")  # Renames column properly
 
-# Create a Word document
-doc <- read_docx()
-doc <- body_add_flextable(doc, results_table)
+# Save as HTML
+stargazer(results, type = "html",
+          summary = FALSE,
+          title = "Table 4. Predictive Performance Results: RMSE",
+          out = "../views/table51.htm",
+          notes.align = "l",
+          notes = paste("Best Model:", lowest, "| Lowest RMSE:", round(lowest_RMSE, 4)),
+          rownames = FALSE)  # Ensure row numbers are not included
 
-# Add a summary of the best model
-doc <- body_add_par(doc, paste("Best Model: ", lowest), style = "Normal")
-doc <- body_add_par(doc, paste("Lowest RMSE: ", lowest_RMSE), style = "Normal")
+print(paste("HTML table successfully saved in", "../views/table51.htm"))
 
-# Save as Word file
-print(doc, target = "results_table51.docx")
+# Save as LaTeX
+stargazer(results, type = "latex",
+          summary = FALSE,
+          title = "Table 4. Predictive Performance Results: RMSEs",
+          out = "../views/table51.tex",
+          notes.align = "l",
+          notes = paste("Best Model:", lowest, "| Lowest RMSE:", round(lowest_RMSE, 4)),
+          rownames = FALSE)  # Ensure row numbers are not included
+
+print(paste("LaTeX table successfully saved in", "../views/table51.tex"))
 
 ## Prediction errors in test sample --------------------------------------------
 
@@ -330,12 +340,6 @@ if (best_model_name == "Model 1") {
 #Analyze residuals
 summary(residuals_best)
 
-#Plot residuals distribution
-ggplot(data.frame(residuals_best), aes(x = residuals_best)) +
-  geom_histogram(bins = 30, fill = "steelblue", alpha = 0.7) +
-  ggtitle(paste("Residuals Distribution -", best_model_name)) +
-  xlab("Residuals") + ylab("Frequency")
-
 #Identify extreme residuals (outliers)
 threshold <- mean(residuals_best) + 2 * sd(residuals_best)
 outliers <- residuals_best[abs(residuals_best) > threshold]
@@ -345,7 +349,23 @@ print("Outliers:")
 print(outliers)
 
 
-## LOOCV
+# Plot residuals distribution with outliers highlighted
+
+# Open PDF device for saving in latex
+pdf("../views/error_distribution.pdf", width = 7, height = 5) 
+
+# Create histogram with outlier annotation
+ggplot(data.frame(residuals_best), aes(x = residuals_best)) +
+  geom_histogram(bins = 30, fill = "steelblue", alpha = 0.7, color = "black") +
+  geom_vline(xintercept = c(threshold, -threshold), linetype = "dashed", color = "red", linewidth = 1) +
+  ggtitle(paste("Residuals Distribution -", best_model_name)) +
+  xlab("Residuals") + ylab("Frequency") +
+  theme_minimal()
+
+# Close PDF device and saves in latex
+dev.off()
+
+## LOOCV -----------------------------------------------------------------------
 
 ctrl <- trainControl(
   method = "LOOCV")
@@ -476,12 +496,7 @@ score_best2_lev
 
 ## COMPARISON WITH VALIDATION SET APPROACH -------------------------------------
 
-# Install required packages
-
-library(officer)
-library(flextable)
-
-# Create your data frame
+# Create data frame
 comparison <- data.frame(
   model = c("Model 12: Validation set approach", "Model 12: LOOCV",
             "Model 12: Leverage", "Model 9: Validation set approach", 
@@ -490,14 +505,20 @@ comparison <- data.frame(
            score9, score_best2, score_best2_lev)
 )
 
-# Convert to flextable
-comparison_table <- flextable(comparison)
-print(comparison_table)
+# Use stargazer to generate HTML output
+stargazer(comparison, type = "html",
+          summary = FALSE, # Avoids unnecessary summary statistics
+          title = "Table 5. Comparison LOOCV and Validation Set Approach",
+          label = "tab:model_comparison",
+          notes = "Note: This table contains the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.",
+          notes.align = "l",
+          out = "../views/table52.htm")  # Saves to LaTeX file
 
-# Create a Word document and add the table
-doc <- read_docx()
-doc <- body_add_flextable(doc, comparison_table)
-
-# Save to Word
-print(doc, target = "regression_table52.docx")
-
+# Use stargazer to generate LaTeX output
+stargazer(comparison, type = "latex",
+          summary = FALSE, # Avoids unnecessary summary statistics
+          title = "Table 5. Comparison LOOCV and Validation Set Approach",
+          notes = "Note: This table contains the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.",
+          notes.align = "l",
+          label = "tab:model_comparison",
+          out = "../views/table52.tex")  # Saves to LaTeX file

@@ -148,7 +148,22 @@ model3 <- lm(log_nominal_income  ~ age + age2, data= db)
 model4 <- lm(log_real_income  ~ age,  data= db)
 model5 <- lm(log_real_income  ~ age + age2, data= db)
 
-# Displaying final regression results after cleaning data 
+# Displaying final regression results after cleaning data (HTML)
+
+stargazer(model2, model3, model4, model5, 
+          title = "Table 2. Regression Results: Nominal and Real Income",
+          align = TRUE,
+          covariate.labels = c("Age", "Age Squared"),
+          dep.var.labels = c("Log Nominal Hourly Wage", "Log Real Hourly Wage"),
+          column.labels = c("Model 2", "Model 3", "Model 4", "Model 5"),
+          no.space = TRUE,
+          omit.stat = c("f", "ser"),
+          notes = "This table presents the estimation results for nominal and real income models, considering age and its quadratic term. Standard errors are in parentheses.",
+          notes.align = "l",
+          type = "html",  # Change to LaTeX format
+          out = "../views/regtable31.htm")  # Save in 'views' folder
+
+# Displaying final regression results after cleaning data (LATEX)
 
 stargazer(model2, model3, model4, model5, 
           title = "Regression Results: Nominal and Real Income",

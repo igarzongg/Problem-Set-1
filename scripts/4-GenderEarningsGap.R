@@ -328,12 +328,24 @@ stargazer(summary_tableBETA1s, summary = FALSE, type = "text",
           title = "Bootstrap + FWL Coefficient Stats vs FWL and OLS Coefficients", 
           digits = 4)
 
-# Printing table - Regression results for wage gap models
+# Printing table - Regression results for wage gap models (HTML)
+stargazer(model6, model7, model7FWL, 
+          type = "html",  
+          covariate.labels = c("Female", "Female FWL"),  
+          dep.var.labels = c("Log Nominal Hourly Wage", "Residualized Log Nominal Hourly Wage"),
+          title = "Table 3. Regression Results: Wage Gap Models",
+          column.labels = c("Model 6", "Model 7", "Model 7 FWL"),  
+          omit = omit_vars,  # Hide control variables
+          notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education. FWL refers to the Frisch-Waugh-Lovell decomposition. Bootstrap models account for resampling variability.",
+          out = "../views/regression_results41.htm")  # Save in 'views' folder
+
+
+# Printing table - Regression results for wage gap models (LATEX)
 stargazer(model6, model7, model7FWL, 
           type = "latex",  # Change to LaTeX format
           covariate.labels = c("Female", "Female FWL"),  
           dep.var.labels = c("Log Nominal Hourly Wage", "Residualized Log Nominal Hourly Wage"),
-          title = "Regression Results: Wage Gap Models",
+          title = "Table 3. Regression Results: Wage Gap Models",
           column.labels = c("Model 6", "Model 7", "Model 7 FWL"),  
           omit = omit_vars,  # Hide control variables
           notes = "Model 7 includes additional controls: Age, Employment Sector, Female Household Head, Weekly Hours Worked, Formality, Firm Size, and Education. FWL refers to the Frisch-Waugh-Lovell decomposition. Bootstrap models account for resampling variability.",
