@@ -15,7 +15,7 @@ This repository contains the following folders:
 
 **scripts:**
   The `scripts/` folder contains the following files, which include functions and analysis in R for this project: 
-  Each script is documented with comments to facilitate understanding and usage
+  Each script is documented with comments to facilitate understanding and usage.
 
 - [Cleaning Data](scripts/1-CleaningData.R): Loading and cleaning the dataset.  
 - [Descriptive Variables](scripts/2-DescriptiveVariables.R): Computes summary statistics.  
