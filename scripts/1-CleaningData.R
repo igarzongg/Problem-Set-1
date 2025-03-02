@@ -55,6 +55,22 @@ for (i in 1:10) {
 
 db <- bind_rows(all_tables)
 
+# CHECK IF 'stores' DIRECTORY EXISTS, IF NOT, CREATE IT --------------------------------
+stores_dir <- "../stores"
+
+if (!dir.exists(stores_dir)) {
+  dir.create(stores_dir, recursive = TRUE)
+  print("Directory 'stores' created.")
+}
+
+# SAVE DATASET TO 'stores' FOLDER -----------------------------------------------------
+file_path <- file.path(stores_dir, "GEIH2018_FULLCOMBINEDTABLES.csv")
+write.csv(db, file_path, row.names = FALSE)
+
+# Confirm save
+print(paste("Dataset successfully saved in", file_path))
+
+
 head(db)  # Display first rows
 
 # DATA CLEANING ----------------------------------------------------------------------
