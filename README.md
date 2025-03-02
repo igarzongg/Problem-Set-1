@@ -42,9 +42,9 @@ This repository contains the following folders:
 - [Figure 1. Predicted Age-Wage Profile with Confidence Intervals](views/age_wage_plot.pdf): Figure 1, displaying the predicted age-wage profile of Models 2 and 3 with confidence intervals in a graph.
 - [Table 3. Regression Results: Wage Gap Models](views/regression_results41.tex): Table 3, displaying the estimated gender-earnings gap for Models 6, 7, and Model 7 being ran by Frisch-Waugh-Lovell decomposition.
 - [Figure 2. Predicted Age-Wage Profile with Confidence Intervals by Sex](views/age_wage_plot_by_sex.pdf): Figure 2, displaying the predicted age-wage profile (by sex) of Models 7.1 and 7.2 with confidence intervals in a graph.
-- [Table 4. Predictive Performance Results: RMSE](table51.htm): Table 4, which contains a summary of the predictive performance of specified models in terms of RMSE.
-- [Figure 3. Distribution of Errors in the Model With Best Performance](error_distribution.pdf): Figure 3, displaying a graph with the distribution of errors of the model with best fit, diagnosing potetial outliers.
-- [Table 5. Comparison LOOCV and Validation Set Approach](table52.htm): Table 5, displaying the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.
+- [Table 4. Predictive Performance Results: RMSE](views/table51.htm): Table 4, which contains a summary of the predictive performance of specified models in terms of RMSE.
+- [Figure 3. Distribution of Errors in the Model With Best Performance](views/error_distribution.pdf): Figure 3, displaying a graph with the distribution of errors of the model with best fit, diagnosing potetial outliers.
+- [Table 5. Comparison LOOCV and Validation Set Approach](views/table52.htm): Table 5, displaying the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.
 
 
 
