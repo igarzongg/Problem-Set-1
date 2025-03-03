@@ -10,6 +10,9 @@ This repository contains the following folders:
 ---
 
 **document:**
+ The `document/` folder contains the final project document in `pdf` format. 
+ 
+ - [Problem Set 1](document/Problem Set 1.pdf)
 
 ---
 
