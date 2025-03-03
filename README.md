@@ -35,7 +35,8 @@ This repository contains the following folders:
 
 **views:**
 
-  The `views/` folder contains the eight (8) tables / figures utilized in the project results document. Tables are included in html (for easy visualization) and LaTeX format, and the figures are included in PDF format.
+  The `views/` folder contains the eight (8) tables / figures utilized in the project results document. Tables are included in html (for easy visualization) and LaTeX format, and the figures are included in PDF format. 
+  DISCLAIMER: PLEASE DOWNLOAD THE HTML FILES AND OPEN THEM IN A BROWSER IN ORDER TO VISUALIZE THE TABLE OUTPUT FROM R.
   
 - [Table 1. Descriptive statistics – continuous variables](views/summarystatscont22.htm): Table 1, containing descriptive statistics for continuous variables.
 - [Table 2. Regression Results: Nominal and Real Income](views/regtable31.htm): Table 2, showing regression results from running Models 2, 3, 4, and 5 mentioned in the document.

@@ -505,20 +505,30 @@ comparison <- data.frame(
            score9, score_best2, score_best2_lev)
 )
 
-# Use stargazer to generate HTML output
-stargazer(comparison, type = "html",
-          summary = FALSE, # Avoids unnecessary summary statistics
-          title = "Table 5. Comparison LOOCV and Validation Set Approach",
-          label = "tab:model_comparison",
-          notes = "Note: This table contains the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.",
-          notes.align = "l",
-          out = "../views/table52.htm")  # Saves to LaTeX file
+# Ensure 'comparison' only has relevant columns
+comparison <- comparison[, c("model", "RMSE")]  # Keep only necessary columns
+colnames(comparison) <- c("Model", "RMSE")  # Rename properly
 
-# Use stargazer to generate LaTeX output
-stargazer(comparison, type = "latex",
-          summary = FALSE, # Avoids unnecessary summary statistics
+# Save as HTML
+stargazer(comparison, type = "html",
+          summary = FALSE,
           title = "Table 5. Comparison LOOCV and Validation Set Approach",
+          label = "tab:model_comparison",
           notes = "Note: This table contains the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.",
           notes.align = "l",
+          rownames = FALSE,  # Remove unnecessary row numbers
+          out = "../views/table52.html")  
+
+print(paste("HTML table successfully saved in", "../views/table52.html"))
+
+# Save as LaTeX
+stargazer(comparison, type = "latex",
+          summary = FALSE,
+          title = "Table 5. Comparison LOOCV and Validation Set Approach",
           label = "tab:model_comparison",
-          out = "../views/table52.tex")  # Saves to LaTeX file
+          notes = "Note: This table contains the LOOCV estimation for the two models with the lowest prediction errors, comparing with the validation set approach.",
+          notes.align = "l",
+          rownames = FALSE,  # Remove unnecessary row numbers
+          out = "../views/table52.tex")  
+
+print(paste("LaTeX table successfully saved in", "../views/table52.tex"))
