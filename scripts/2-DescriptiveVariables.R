@@ -190,6 +190,10 @@ vars <- db[, c("log_nominal_income","log_real_income",
                "exp_log_nominal_income", "exp_log_real_income", 
                "age", "Weekly_Hours_Worked")]
 
+# Rename variables in dataset
+vars_renamed <- vars
+names(vars_renamed) <- var_labels[names(vars_renamed)]
+
 #Creates views folder
 
 if (!dir.exists("../views")) dir.create("../views")
@@ -209,7 +213,7 @@ var_labels <- c(
 )
 
 # Generate summary statistics table in HTML format
-stargazer(vars, 
+stargazer(vars_renamed, 
           type = "html", 
           summary.stat = c("n", "mean", "sd", "min", "max"), 
           title = "Table 1. Descriptive statistics – continuous variables",
