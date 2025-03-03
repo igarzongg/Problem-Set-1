@@ -47,21 +47,6 @@ ggplot(split_data, aes(x = Split, y = Count)) +
 # b) 
 
 # PREDICTIVE PERFORMANCE IN TERMS OF THE RMSE ----------------------------------
-# --------------- model 1 & model 2 results for Nominal Hourly Wage ------------
-# MODEL 1 ----------------------------------------------------------------------
-
-reg_1<- log_nominal_income ~ age + age2
-
-model1 <- lm(reg_1,
-             data = training)
-
-# PERFORMANCE RMSE -------------------------------------------------------------
-prediction_model1 <- predict(model1, testing)
-
-# With the caret package we can calculate the performance across resamples, caret::RMSE
-score1<- RMSE(prediction_model1, testing$log_nominal_income )
-score1
-# RMSE : 0.3407032
 
 # MODEL 2 ----------------------------------------------------------------------
 
@@ -81,7 +66,7 @@ score2
 # ---------- model 3 & model 4 results for real Hourly Wage -----------------
 # MODEL 3 ----------------------------------------------------------------------
 
-reg_3<- log_real_income  ~ age + age2
+reg_3<- log_nominal_income  ~ age + age2
 
 model3 <- lm(reg_3,
              data = training)
@@ -93,7 +78,7 @@ prediction_model3 <- predict(model3, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score3<- RMSE(prediction_model3, testing$log_real_income )
 score3
-# RMSE :0.313405
+# RMSE :0.325384
 
 # MODEL 4 ----------------------------------------------------------------------
 
@@ -113,7 +98,7 @@ score4
 
 # MODEL 5 ----------------------------------------------------------------------
 
-reg_5<- log_nominal_income  ~ female
+reg_5<- log_real_income  ~ age + age2
 
 model5 <- lm(reg_5,
              data = training)
@@ -125,11 +110,11 @@ prediction_model5 <- predict(model5, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score5<- RMSE(prediction_model5, testing$log_nominal_income )
 score5
-# RMSE :0.3436428
+# RMSE :0.3525494
 
 # MODEL 6 ----------------------------------------------------------------------
 
-reg_6 <- log_real_income  ~ female
+reg_6 <- log_nominal_income  ~ female
 
 model6 <- lm(reg_6,
              data = training)
@@ -141,7 +126,7 @@ prediction_model6 <- predict(model6, testing)
 # With the caret package we can calculate the performance across resamples, caret::RMSE
 score6<- RMSE(prediction_model6, testing$log_real_income )
 score6
-# RMSE :0.3153226
+# RMSE :0.3273068
 
 # MODEL 7 ----------------------------------------------------------------------
 
@@ -257,11 +242,11 @@ library(officer)
 
 # Create the data frame
 results <- data.frame(
-  model = c("Model 1", "Model 2", "Model 3", 
+  model = c("Model 2", "Model 3", 
             "Model 4", "Model 5", "Model 6", 
             "Model 7", "Model 8", "Model 9", 
             "Model 10", "Model 11", "Model 12"),
-  RMSE = c(score1, score2, score3, score4, score5, score6, score7, 
+  RMSE = c(score2, score3, score4, score5, score6, score7, 
            score8, score9, score10, score11, score12),
   row.names = NULL
 )
@@ -301,19 +286,17 @@ print(paste("LaTeX table successfully saved in", "../views/table51.tex"))
 
 ## Prediction errors in test sample --------------------------------------------
 
-model <- c("Model 1", "Model 2", "Model 3", 
+Model <- c("Model 2", "Model 3", 
            "Model 4", "Model 5", "Model 6", 
            "Model 7", "Model 8", "Model 9", "Model 10", "Model 11", "Model 12")
 
-best_model_name <- results$model[1]
+best_model_name <- results$Model[1]
 best_model_rmse <- results$RMSE[1]
 
 print(paste("Best Model:", best_model_name, "with RMSE:", best_model_rmse))
 
 # Step 2: Retrieve predictions and compute residuals for the best model
-if (best_model_name == "Model 1") {
-  residuals_best <- testing$log_nominal_income - prediction_model1
-} else if (best_model_name == "Model 2") {
+ if (best_model_name == "Model 2") {
   residuals_best <- testing$log_nominal_income - prediction_model2
 } else if (best_model_name == "Model 3") {
   residuals_best <- testing$log_real_income - prediction_model3
