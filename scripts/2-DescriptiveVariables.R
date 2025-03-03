@@ -225,7 +225,7 @@ stargazer(vars_renamed,
 
 # Generate summary statistics table (LATEX)
 
-stargazer(vars, 
+stargazer(vars_renamed, 
           type = "latex",       # Export as LaTeX
           summary.stat = c("n", "mean", "sd", "min", "max"),
           title = "Summary Statistics - Continuous Variables",
