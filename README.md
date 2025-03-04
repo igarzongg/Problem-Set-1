@@ -41,7 +41,7 @@ This repository contains the following folders:
   The `views/` folder contains the eight (8) tables / figures utilized in the project results document. Tables are included in html (for easy visualization) and LaTeX format, and the figures are included in PDF format. 
   DISCLAIMER: PLEASE DOWNLOAD THE HTML FILES AND OPEN THEM IN A BROWSER IN ORDER TO VISUALIZE THE TABLE OUTPUT FROM R.
   
-- [Table 1. Descriptive statistics – continuous variables](views/summarystatscont22.htm): Table 1, containing descriptive statistics for continuous variables.
+- [Table 1. Descriptive statistics – Continuous variables](views/summarystatscont22.htm): Table 1, containing descriptive statistics for continuous variables.
 - [Table 2. Regression Results: Nominal and Real Income](views/regtable31.htm): Table 2, showing regression results from running Models 2, 3, 4, and 5 mentioned in the document.
 - [Figure 1. Predicted Age-Wage Profile with Confidence Intervals](views/age_wage_plot.pdf): Figure 1, displaying the predicted age-wage profile of Models 2 and 3 with confidence intervals in a graph.
 - [Table 3. Regression Results: Wage Gap Models](views/regression_results41.tex): Table 3, displaying the estimated gender-earnings gap for Models 6, 7, and Model 7 being ran by Frisch-Waugh-Lovell decomposition.
